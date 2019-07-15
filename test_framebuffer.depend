@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1562704991 source:/home/fjs/sdlProjects/test_framebuffer/main.c
+	<SDL2/SDL.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdlib.h>
+
