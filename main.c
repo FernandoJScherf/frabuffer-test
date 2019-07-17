@@ -77,30 +77,30 @@ int main( int argc, char* args[] )
     //                                      v2.y == v3.y
 
     Vertice v1;
-    v1.x = 100;
-    v1.y = 10;
+    v1.x = 25;
+    v1.y = 25;
 
     Vertice v2;
-    v2.x = 50;
-    v2.y = 90;
+    v2.x = 25;
+    v2.y = 100;
 
     Vertice v3;
     v3.x = 150;
-    v3.y = 90;
+    v3.y = 150;
 
     //The top triangle. requirementes:      v3.y > v1.y
     //                                      v1.y == v2.y
     Vertice vt1;
-    vt1.x = 300;
-    vt1.y = 50;
+    vt1.x = 200;
+    vt1.y = 25;
 
     Vertice vt2;
-    vt2.x = 500;
-    vt2.y = 50;
+    vt2.x = 200;
+    vt2.y = 100;
 
     Vertice vt3;
-    vt3.x = 400;
-    vt3.y = 300;
+    vt3.x = 250;
+    vt3.y = 150;
 
     while(currentTime < 15000)
     {
@@ -117,17 +117,10 @@ int main( int argc, char* args[] )
         //Playing with the PIXELS of the surface: /////////////////////////////////////////////////
         SDL_LockSurface(screenSurface);
 
-
-        FillUpTriangle(v1, v2, v3, screenSurface);
-        FillDownTriangle(vt1, vt2, vt3, screenSurface);
-
-        v3.x++;
-        if(v3.x >= SCREEN_WIDTH)
-            v3.x = 150;
-
-        v3.y = ++v2.y;
-        if(v3.y >= SCREEN_HEIGHT)
-            v3.y = v2.y = 90;
+        v1.y = 55;
+        FillTriangle(v2, v3, v1, screenSurface);
+        FillTriangle(vt2, vt1, vt3, screenSurface);
+       // v3.y--;
 
 //        color = 0xFFF00FFF;
 //
@@ -162,6 +155,8 @@ int main( int argc, char* args[] )
 
         SDL_RenderCopy(sdlRenderer, sdlTexture, NULL, NULL);
         SDL_RenderPresent(sdlRenderer);
+
+        SDL_Delay(100);
 
     }
 

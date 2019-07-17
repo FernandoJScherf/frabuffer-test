@@ -9,11 +9,14 @@
 // http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#sunbresenhamarticle
 // http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
 
+// Later I could implement some "other types" of triangles: textured, gourald?, noise, etc.
+
 typedef struct Vertice {
     float x, y;
 } Vertice;
 
 void FillUpTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface);
 void FillDownTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface);
+void FillTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface);
 
 #endif // SHAPES_H_INCLUDED
