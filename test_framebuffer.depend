@@ -1,7 +1,17 @@
 # depslib dependency file v1.0
-1562704991 source:/home/fjs/sdlProjects/test_framebuffer/main.c
+1563318492 source:/home/fjs/sdlProjects/test_framebuffer/main.c
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<stdio.h>
 	<stdlib.h>
+	"shapes.h"
+
+1563317975 /home/fjs/sdlProjects/test_framebuffer/shapes.h
+	<SDL2/SDL.h>
+	<SDL2/SDL_ttf.h>
+	<stdio.h>
+	<stdlib.h>
+
+1563317964 source:/home/fjs/sdlProjects/test_framebuffer/shapes.c
+	"shapes.h"
 
