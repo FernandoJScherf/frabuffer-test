@@ -76,33 +76,33 @@ int main( int argc, char* args[] )
     //The bottom triangle. Requirements:    v1.y < v2.y
     //                                      v2.y == v3.y
 
-    Vertice v1;
-    v1.x = 25;
-    v1.y = 25;
+    Vertex v1;
+    v1.x = 100;
+    v1.y = 0;
 
-    Vertice v2;
-    v2.x = 25;
-    v2.y = 100;
+    Vertex v2;
+    v2.x = 100;
+    v2.y = 0;
 
-    Vertice v3;
-    v3.x = 150;
+    Vertex v3;
+    v3.x = 50;
     v3.y = 150;
 
     //The top triangle. requirementes:      v3.y > v1.y
     //                                      v1.y == v2.y
-    Vertice vt1;
-    vt1.x = 200;
-    vt1.y = 25;
+    Vertex vt1;
+    vt1.x = 300;
+    vt1.y = 100;
 
-    Vertice vt2;
-    vt2.x = 200;
-    vt2.y = 100;
+    Vertex vt2;
+    vt2.x = 500;
+    vt2.y = 150;
 
-    Vertice vt3;
-    vt3.x = 250;
-    vt3.y = 150;
+    Vertex vt3;
+    vt3.x = 150;
+    vt3.y = 250;
 
-    while(currentTime < 15000)
+    while(currentTime < 10000)
     {
         lastTime = currentTime;
         currentTime = SDL_GetTicks();
@@ -117,9 +117,24 @@ int main( int argc, char* args[] )
         //Playing with the PIXELS of the surface: /////////////////////////////////////////////////
         SDL_LockSurface(screenSurface);
 
-        v1.y = 55;
-        FillTriangle(v2, v3, v1, screenSurface);
-        FillTriangle(vt2, vt1, vt3, screenSurface);
+        //v1.y = 55;
+        //FillTriangle(v2, v3, v1, screenSurface);
+        //FillTriangle(vt2, vt1, vt3, screenSurface);
+
+        v1.x = rand() % SCREEN_WIDTH;
+        v1.y = rand() % SCREEN_HEIGHT;
+        v2.x = rand() % SCREEN_WIDTH;
+        v2.y = rand() % SCREEN_HEIGHT;
+        v3.x = rand() % SCREEN_WIDTH;
+        v3.y = rand() % SCREEN_HEIGHT;
+
+        TriangleFlat(v1, v2, v3, screenSurface);
+        //TriangleFlat(vt1, vt2, vt3, screenSurface);
+        //TriangleFlat(vt1, vt3, vt2, screenSurface);
+        //TriangleFlat(vt2, vt1, vt3, screenSurface);
+        //TriangleFlat(vt2, vt3, vt1, screenSurface);
+        //TriangleFlat(vt3, vt1, vt2, screenSurface);
+        //TriangleFlat(vt3, vt2, vt1, screenSurface);
        // v3.y--;
 
 //        color = 0xFFF00FFF;

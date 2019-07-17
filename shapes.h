@@ -19,4 +19,14 @@ void FillUpTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface);
 void FillDownTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface);
 void FillTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface);
 
+//Let's try to do it better:
+//http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
+typedef struct Vertex {
+    float x, y;
+} Vertex;
+
+void TriangleFlat(Vertex v1, Vertex v2, Vertex v3, SDL_Surface* surface);
+static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
+                    float left_dXdY, float right_dXdY, SDL_Surface* surface);
+
 #endif // SHAPES_H_INCLUDED
