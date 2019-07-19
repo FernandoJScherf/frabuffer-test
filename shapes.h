@@ -6,8 +6,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-// http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#sunbresenhamarticle
-// http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
+// triangles:
+//      http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#algo1
+// https://www.joshbeam.com/articles/triangle_rasterization/
+
+// mas sofisticado, con gradientes y texturas:
+// http://www-users.mat.uni.torun.pl/~wrona/3d_tutor/tri_fillers.html
+// http://www.salomonsson.se/devlog/math5.html
+    // http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
 
 // Later I could implement some "other types" of triangles: textured, gourald?, noise, etc.
 

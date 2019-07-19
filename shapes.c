@@ -248,7 +248,7 @@ TriangleFlat(Vertex v1, Vertex v2, Vertex v3, SDL_Surface* surface)
 
 
 
-    printf("v1.y: %f, v2.y: %f, v3.y: %f\n", v1.y, v2.y, v3.y);
+    //printf("v1.y: %f, v2.y: %f, v3.y: %f\n", v1.y, v2.y, v3.y);
 }
 
 //I could probably make those variables gobals, except for topY and bottomY.
