@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h> //rand()
 #include "shapes.h"
+#include "gui.h"
 
 // https://wiki.libsdl.org/MigrationGuide
 // https://wiki.libsdl.org/SDL_Surface
@@ -39,6 +40,18 @@ char init()
         return 1;
     }
     printf("SDL Initialized without problems!\n");
+
+    ////
+    SDL_version compiled;
+    SDL_version linked;
+
+    SDL_VERSION(&compiled);
+    SDL_GetVersion(&linked);
+    printf("We compiled against SDL version %d.%d.%d ...\n",
+           compiled.major, compiled.minor, compiled.patch);
+    printf("But we are linking against SDL version %d.%d.%d.\n",
+           linked.major, linked.minor, linked.patch);
+    ////
 
     //Create the window we'll be rendering to:
 	window = SDL_CreateWindow( "SDL testing framebuffer technique",
@@ -86,6 +99,14 @@ char init()
     return 0;
 }
 
+
+void testFunctionForClickedButton()
+{
+    static int click = 0;
+    printf("click %d!\n", click);
+    click++;
+}
+
 int main( int argc, char* args[] )
 {
     //Start up SDL and create window, surface to draw pixels, and texture where to copy the
@@ -111,9 +132,12 @@ int main( int argc, char* args[] )
         uint32_t currentTime = SDL_GetTicks();
 
         //A triangle:
-        Vertex v1;        v1.x = 100;       v1.y = 0;
-        Vertex v2;        v2.x = 100;       v2.y = 0;
-        Vertex v3;        v3.x = 50;        v3.y = 150;
+        Point v1;        v1.x = 100;       v1.y = 0;
+        Point v2;        v2.x = 100;       v2.y = 0;
+        Point v3;        v3.x = 50;        v3.y = 150;
+
+        //A button:
+        Button* button = CreateTextButton("hello button.", 0, 0, 100, 50, 0);
 
         uint8_t keepRunning = 1;    //Main loop flag!   1 means "yes".
 
@@ -132,18 +156,27 @@ int main( int argc, char* args[] )
             sprintf(frameTimeString, "frame Time: %i - last bad max time: %i", frameTime, maxTime);
 
             //Handle events on queue:
-            while( SDL_PollEvent( &e ) != 0 )
+            while(SDL_PollEvent(&e) != 0)
             {
-                if( e.type == SDL_QUIT )    //User requests quit.
+                if(e.type == SDL_QUIT)          //User requests quit.
+                    keepRunning = 0;            //0 means "no".
+                else if(e.type == SDL_KEYDOWN)
                 {
-                    keepRunning = 0;    //0 means "no".
+                    switch( e.key.keysym.sym )
+                    {
+                        case SDLK_ESCAPE:       //User requests quit.
+                            keepRunning = 0;    //0 means "no".
+                            break;
+                    }
                 }
+                else if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP)
+                    EventButton(button, &e, testFunctionForClickedButton);
             }
 
+            //Playing with the PIXELS of the surface: /////////////////////////////////////////////////
             //Erase everything on the surface to white before drawing again:
             SDL_FillRect(screenSurface, NULL, 0xFFF000F0);
 
-            //Playing with the PIXELS of the surface: /////////////////////////////////////////////////
             SDL_LockSurface(screenSurface);
 
             v1.x = 0;//rand() % SCREEN_WIDTH;
@@ -154,6 +187,11 @@ int main( int argc, char* args[] )
             v3.y = 0; //rand() % SCREEN_HEIGHT;
 
             TriangleFlat(v1, v2, v3, screenSurface);
+
+
+            //Draw button:
+            DrawButton(button, screenSurface);
+
 
             SDL_UnlockSurface(screenSurface);
             ///////////////////////////////////////////////////////////////////////////////////////////

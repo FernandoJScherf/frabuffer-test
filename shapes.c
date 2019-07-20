@@ -2,7 +2,7 @@
 
 // http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#sunbresenhamarticle
 
-FillUpTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
+FillUpTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 {
     //        v1 *
     //          / \
@@ -41,7 +41,7 @@ FillUpTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
     }
 }
 
-FillDownTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
+FillDownTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 {
     //    v1 *-------* v2
     //        \     /
@@ -78,7 +78,7 @@ FillDownTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
     }
 }
 
-FillTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
+FillTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 {
     //        v1 *
     //          / \         from top to bottom! v1.y <= v2.y <= v3.y
@@ -91,7 +91,7 @@ FillTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
 
 
     //First, sort the vertices by y-coordinate ascending so V1 is the topmost vertice.
-    Vertice helper;
+    Point helper;
     if(v1.y > v2.y)         //If v1.y is under v2.y
     {
         helper = v1;     //We swap them.
@@ -117,7 +117,7 @@ FillTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
     //Ok, we shoud be ready now... I suppose:
 
     //General case - split the triangle in two; a top-flat and bottom-flat one:
-    Vertice v4;
+    Point v4;
     v4.y = v2.y;
     v4.x = v1.x + ( (v2.y - v1.y) / (v3.y - v1.y) * (v3.x - v1.x) );
     //And draw them!:
@@ -150,7 +150,7 @@ FillTriangle(Vertice v1, Vertice v2, Vertice v3, SDL_Surface* surface)
 }//This isn't working as it should at is not as efficient either.
 
 //http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
-TriangleFlat(Vertex v1, Vertex v2, Vertex v3, SDL_Surface* surface)
+TriangleFlat(Point v1, Point v2, Point v3, SDL_Surface* surface)
 {
     //        v1 *
     //          / \         from top to bottom! v1.y <= v2.y <= v3.y
@@ -162,7 +162,7 @@ TriangleFlat(Vertex v1, Vertex v2, Vertex v3, SDL_Surface* surface)
     //               ---* v3
 
     //Sort the vertices by their y values:
-    Vertex helper;
+    Point helper;
     if(v1.y > v2.y)         //If v1.y is under v2.y
     {
         helper = v1;     //We swap them.
@@ -196,62 +196,31 @@ TriangleFlat(Vertex v1, Vertex v2, Vertex v3, SDL_Surface* surface)
     //We have to decide whether V2 is on the left side or the right one
     //We could do that by finding the V4, and check the distance from
     // V4 to V2, distance = V4.x - V2.x :
-    Vertex v4;
+    Point v4;
     v4.y = v2.y;
     //The next operation is derived from: http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#sunbresenhamarticle
     v4.x = v1.x + ( (v2.y - v1.y) / (v3.y - v1.y) * (v3.x - v1.x) );
 
     float distance = v4.x - v2.x;
 
-    float left_dXdY, right_dXdY, leftX, rightX;
-
     if(distance > 0)    //if (distance>0) the middle vertex v2 is on the left side
     {                   //(V1V3 is the longest edge on the right side)
-
+        //A triangle is made out of two segments:
         DrawSegment(v1.y, v2.y, v1.x, v1.x, dXdY_V1V2, dXdY_V1V3, surface);
         DrawSegment(v2.y, v3.y, v2.x, v4.x, dXdY_V2V3, dXdY_V1V3, surface);
     }
     else                //and if (distance<0) then V1V3 is on the left side.
     {
-        left_dXdY   = dXdY_V1V3;
-        right_dXdY  = dXdY_V1V2;
+        //A triangle is made out of two segments:
         DrawSegment(v1.y, v2.y, v1.x, v1.x, dXdY_V1V3, dXdY_V1V2, surface);
         DrawSegment(v2.y, v3.y, v4.x, v2.x, dXdY_V1V3, dXdY_V2V3, surface);
     }
 
     //A triangle is made out of two segments: v1.y to v2.y and v2.y to v3.y:
-    //Let's draw the first segment: /////////////////////////////////////////////////////
-
-    /*
-    leftX = v1.x; //We start from the top.
-    rightX = v1.x; //We start from the top.
-
-    //pointer to the pixels of the surface:
-    uint32_t *pixels = surface->pixels;
-    //Let's access the width only once and save them for later:
-    uint16_t surfaceW = surface->w;
-
-    //for every scanline:
-    for(int scanlineY = v1.y; scanlineY <= v2.y; scanlineY++)
-    {
-        //draw current scanline, between currentX1 and currentX2:
-        for(int currentXToDraw = leftX; currentXToDraw <= rightX; currentXToDraw++)
-            //Draw a point:
-            pixels[currentXToDraw + surfaceW * scanlineY] = 0xFFFF0000; //Hardcoded, for now.
-
-        //Calculate the next X1 and X2 to draw the next line:
-        leftX   += dXdY_V1V2;
-        rightX  += dXdY_V1V3;
-    }*/
-    /////////////////////////////////////////////////////////////////////////////////////
-
-
-
 
     //printf("v1.y: %f, v2.y: %f, v3.y: %f\n", v1.y, v2.y, v3.y);
 }
 
-//I could probably make those variables gobals, except for topY and bottomY.
 static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
                     float left_dXdY, float right_dXdY, SDL_Surface* surface)
 {
