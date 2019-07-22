@@ -2,7 +2,30 @@
 
 // http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#sunbresenhamarticle
 
-FillUpTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
+static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
+                    float left_dXdY, float right_dXdY, uint32_t argb, SDL_Surface* surface)
+{
+    //pointer to the pixels of the surface:
+    uint32_t *pixels = surface->pixels;
+    //Let's access the width only once and save them for later:
+    uint16_t surfaceW = surface->w;
+
+    //for every scanline:
+    for(int scanlineY = topY; scanlineY <= bottomY; scanlineY++)
+    {
+        //draw current scanline, between currentX1 and currentX2:
+        for(int currentXToDraw = leftX; currentXToDraw <= rightX; currentXToDraw++)
+            //Draw a point:
+            pixels[currentXToDraw + surfaceW * scanlineY] = argb; //Hardcoded, for now.
+
+        //Calculate the next X1 and X2 to draw the next line:
+        leftX   += left_dXdY;
+        rightX  += right_dXdY;
+    }
+}
+
+
+void FillUpTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 {
     //        v1 *
     //          / \
@@ -41,7 +64,7 @@ FillUpTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
     }
 }
 
-FillDownTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
+void FillDownTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 {
     //    v1 *-------* v2
     //        \     /
@@ -78,7 +101,7 @@ FillDownTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
     }
 }
 
-FillTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
+void FillTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 {
     //        v1 *
     //          / \         from top to bottom! v1.y <= v2.y <= v3.y
@@ -150,7 +173,7 @@ FillTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 }//This isn't working as it should at is not as efficient either.
 
 //http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
-TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surface)
+void TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surface)
 {
     //        v1 *
     //          / \         from top to bottom! v1.y <= v2.y <= v3.y
@@ -220,29 +243,6 @@ TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surface)
 
     //printf("v1.y: %f, v2.y: %f, v3.y: %f\n", v1.y, v2.y, v3.y);
 }
-
-static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
-                    float left_dXdY, float right_dXdY, uint32_t argb, SDL_Surface* surface)
-{
-    //pointer to the pixels of the surface:
-    uint32_t *pixels = surface->pixels;
-    //Let's access the width only once and save them for later:
-    uint16_t surfaceW = surface->w;
-
-    //for every scanline:
-    for(int scanlineY = topY; scanlineY <= bottomY; scanlineY++)
-    {
-        //draw current scanline, between currentX1 and currentX2:
-        for(int currentXToDraw = leftX; currentXToDraw <= rightX; currentXToDraw++)
-            //Draw a point:
-            pixels[currentXToDraw + surfaceW * scanlineY] = argb; //Hardcoded, for now.
-
-        //Calculate the next X1 and X2 to draw the next line:
-        leftX   += left_dXdY;
-        rightX  += right_dXdY;
-    }
-}
-
 
 
 

@@ -33,7 +33,7 @@ void FillTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface);
 //http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
 
 void TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surface);
-static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
-                    float left_dXdY, float right_dXdY, uint32_t argb, SDL_Surface* surface);
+//static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
+//                    float left_dXdY, float right_dXdY, uint32_t argb, SDL_Surface* surface);
 
 #endif // SHAPES_H_INCLUDED

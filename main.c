@@ -133,6 +133,24 @@ void testFunctionForClickedButton()
     printf("El color al azar es:  %d!\n", triangleColor);
 }
 
+void testFunction1()
+{
+    testFunctionForClickedButton();
+    printf("This time the first button was pressed!\n");
+}
+
+void testFunction2()
+{
+    testFunctionForClickedButton();
+    printf("This time the second button was pressed!\n");
+}
+
+void testFunction3()
+{
+    testFunctionForClickedButton();
+    printf("This time the third button was pressed!\n");
+}
+
 int main( int argc, char* args[] )
 {
     //Start up SDL and create window, surface to draw pixels, and texture where to copy the
@@ -160,7 +178,9 @@ int main( int argc, char* args[] )
         Point v3;        v3.x = 50;        v3.y = 150;
 
         //A button:
-        Button* button = CreateTextButton("Change!", buttonFont, 10, 50, 100, 30, 0xFF000000, screenSurface);
+        CreateTextButton(testFunction1,  "Change!", buttonFont, 10, 50, 100, 30, 0xFF000000, screenSurface);
+        CreateTextButton(testFunction2, "Change 2!", buttonFont, 100, 150, 100, 30, 0xFF000000, screenSurface);
+        CreateTextButton(testFunction3, "Change three!", buttonFont, 150, 250, 50, 20, 0xFF000000, screenSurface);
 
         uint8_t keepRunning = 1;    //Main loop flag!   1 means "yes".
 
@@ -193,7 +213,7 @@ int main( int argc, char* args[] )
                     }
                 }
                 else if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP)
-                    EventButton(button, &e, testFunctionForClickedButton);
+                    EventButtons(&e);
             }
 
             //Playing with the PIXELS of the surface: /////////////////////////////////////////////////
@@ -215,7 +235,7 @@ int main( int argc, char* args[] )
             ///////////////////////////////////////////////////////////////////////////////////////////
 
             //Draw button:
-            DrawButton(button, screenSurface);
+            DrawButtons(screenSurface);
 
 
             textSurface = TTF_RenderText_Solid(textFont, frameTimeString, textColor);
@@ -236,7 +256,7 @@ int main( int argc, char* args[] )
 
         }
     SDL_FreeSurface(textSurface);
-    DestroyButton(button);
+//    DestroyButton(button);
 
     }
 

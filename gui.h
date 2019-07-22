@@ -17,11 +17,16 @@ typedef struct Button {
     //Start with only that function, but later implement whenUnClicked and WhenPassedOver.
 } Button;
 
-Button* CreateTextButton(const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
+//Create a button and add it to the internal array of gui elements:
+void CreateTextButton(  void (*WhenClicked)(),
+                        const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
                         uint16_t w, uint16_t h, uint32_t color, SDL_Surface* destSurface);
 void ChangeTextOfButton(Button* button, TTF_Font* textFont, const char* text);
-void EventButton(Button* button, SDL_Event* e, void (*WhenClicked)());
-void DrawButton(Button* button, SDL_Surface* destSurface);
+void EventButtons(SDL_Event* e);
+void DrawButtons(SDL_Surface* destSurface);
 void DestroyButton(Button* button);
+
+int     GUI_Init();     //To call before using any of the other functions. Inits array.
+void    GUI_Quit();     //To free all memory allocated for the array of buttons.
 
 #endif // GUI_H_INCLUDED
