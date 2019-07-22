@@ -60,7 +60,7 @@ char init()
     ////
 
     //Create the window we'll be rendering to:
-	window = SDL_CreateWindow( "SDL testing framebuffer technique",
+	window = SDL_CreateWindow( "Graphics Editor 0.1",
                             SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                             SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_MAXIMIZED );
     if(window == NULL)  //Check for error.
@@ -178,7 +178,7 @@ int main( int argc, char* args[] )
         Point v3;        v3.x = 50;        v3.y = 150;
 
         //A button:
-        CreateTextButton(testFunction1,  "Change!", buttonFont, 10, 50, 100, 30, 0xFF000000, screenSurface);
+        CreateTextButton(testFunction1, "Change!", buttonFont, 10, 50, 100, 30, 0xFF000000, screenSurface);
         CreateTextButton(testFunction2, "Change 2!", buttonFont, 100, 150, 100, 30, 0xFF000000, screenSurface);
         CreateTextButton(testFunction3, "Change three!", buttonFont, 150, 250, 50, 20, 0xFF000000, screenSurface);
 
@@ -256,7 +256,7 @@ int main( int argc, char* args[] )
 
         }
     SDL_FreeSurface(textSurface);
-//    DestroyButton(button);
+    GUI_Quit();
 
     }
 

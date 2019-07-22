@@ -9,14 +9,14 @@ int16_t arrayGuiSize = 0;
 //
 //}
 
-void CreateTextButton(  void (*WhenClicked)(),
+Button* CreateTextButton(  void (*WhenClicked)(),
                         const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
-                        uint16_t w, uint16_t h, uint32_t color, SDL_Surface* destSurface) //Add text color.
+                        uint16_t w, uint16_t h, uint32_t color, SDL_Surface* destSurface)
 {
     //Make the array bigger to hold the gui element created.
     arrayGui = (Button*)realloc(arrayGui, (arrayGuiSize + 1) * sizeof(Button*) );
     //Add one button to the array.
-    *(arrayGui + arrayGuiSize) = (Button*) malloc(sizeof(Button));
+    arrayGui[arrayGuiSize] = (Button*) malloc(sizeof(Button));
 
     //button->text = (char*) malloc(strlen(text) + 1);
 
@@ -51,14 +51,14 @@ void CreateTextButton(  void (*WhenClicked)(),
     SDL_FreeSurface(textSurface);
     //SDL_FreeSurface(textSurfaceOptimized);
     //printf("%d - %s\n", button->drawThisSurface    , SDL_GetError()    );
-    //return button;
     arrayGuiSize++;
+    return arrayGui[arrayGuiSize];
 }
-void ChangeTextOfButton(Button* button, TTF_Font* textFont, const char* text)       //Add text color.
-{
-    //button->text = (char*) realloc(button->text, strlen(text) + 1);
-//    button->textSurface = TTF_RenderText_Solid(textFont, text, (SDL_Color){255, 255, 255, 255});
-}
+//void ChangeTextOfButton(Button* button, TTF_Font* textFont, const char* text)       //Add text color.
+//{
+//    //button->text = (char*) realloc(button->text, strlen(text) + 1);
+////    button->textSurface = TTF_RenderText_Solid(textFont, text, (SDL_Color){255, 255, 255, 255});
+//}
 void EventButtons(SDL_Event* e)   //Eliminate the second parameter. That function should be specified inside of the button struct.
 {
      //Get mouse position
@@ -72,9 +72,7 @@ void EventButtons(SDL_Event* e)   //Eliminate the second parameter. That functio
                 y < (arrayGui[i]->h + arrayGui[i]->y) && y > arrayGui[i]->y)
             arrayGui[i]->WhenClicked();
     }
-
 }
-
 
 void DrawButtons(SDL_Surface* destSurface)
 {
@@ -85,15 +83,16 @@ void DrawButtons(SDL_Surface* destSurface)
         destRect.w = arrayGui[i]->w; destRect.h = arrayGui[i]->h;
         SDL_BlitSurface(arrayGui[i]->drawThisSurface, NULL, destSurface, &destRect);
     }
-
-//    printf("%d - %s\n", SDL_BlitSurface(button->drawThisSurface, NULL, destSurface, NULL)
-//    , SDL_GetError()
-//    );
 }
-void DestroyButton(Button* button)
+void GUI_Quit()
 {
-    SDL_FreeSurface(button->drawThisSurface);//    SDL_FreeSurface(button->textSurface); //free(button->text);
-    free(button);
+    for(int i = 0; i < arrayGuiSize; i++)
+    {
+        SDL_FreeSurface(arrayGui[i]->drawThisSurface);//    SDL_FreeSurface(button->textSurface); //free(button->text);
+        free(arrayGui[i]);
+        //arrayGuiSize--;
+    }
+    free(arrayGui);
 }
 
 
