@@ -2,7 +2,7 @@
 <CodeBlocks_project_file>
 	<FileVersion major="1" minor="6" />
 	<Project>
-		<Option title="test_framebuffer" />
+		<Option title="Graphics Editor" />
 		<Option pch_mode="2" />
 		<Option compiler="gcc" />
 		<Build>
@@ -36,6 +36,7 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="editor_gui_objects.h" />
 		<Unit filename="gui.c">
 			<Option compilerVar="CC" />
 		</Unit>

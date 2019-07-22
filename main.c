@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h> //rand()
 #include "shapes.h"
-#include "gui.h"
+#include "editor_gui_objects.h"
 
 // https://wiki.libsdl.org/MigrationGuide
 // https://wiki.libsdl.org/SDL_Surface
@@ -21,13 +21,13 @@ SDL_Surface* screenSurface = NULL;
 SDL_Texture* sdlTexture = NULL;
 
 TTF_Font *textFont = NULL;
-TTF_Font *buttonFont = NULL;
 
 //The init and cleanAndClose functions, just to keep main a little bit more organized:
 void cleanAndClose()
 {
+    Editor_Quit();
+
     TTF_CloseFont(textFont);
-    TTF_CloseFont(buttonFont);
     TTF_Quit();
 
     SDL_FreeSurface(screenSurface);
@@ -109,46 +109,19 @@ char init()
     }
 
     textFont = TTF_OpenFont("synchronizer_nbp.ttf", 16); //Check for error.
-    buttonFont = TTF_OpenFont("synchronizer_nbp.ttf", 8); //Check for error.
 
-    if(textFont == NULL || buttonFont == NULL)
+    if(textFont == NULL)
     {
         printf("TTF_OpenFont failed! Probably the font is missiong! TTF_GetError: %s\n", TTF_GetError());
         return 7;
     }
 
     printf("Font subsystem initializated without problems and fonts loaded!\n");
+
+    Editor_Init(screenSurface);
+
     printf("Initialization ended without problems!\n");
     return 0;
-}
-
-uint32_t triangleColor = 0xFF000000;
-
-void testFunctionForClickedButton()
-{
-    static int click = 0;
-    printf("click %d!\n", click);
-    click++;
-    triangleColor = rand();
-    printf("El color al azar es:  %d!\n", triangleColor);
-}
-
-void testFunction1()
-{
-    testFunctionForClickedButton();
-    printf("This time the first button was pressed!\n");
-}
-
-void testFunction2()
-{
-    testFunctionForClickedButton();
-    printf("This time the second button was pressed!\n");
-}
-
-void testFunction3()
-{
-    testFunctionForClickedButton();
-    printf("This time the third button was pressed!\n");
 }
 
 int main( int argc, char* args[] )
@@ -171,16 +144,6 @@ int main( int argc, char* args[] )
         uint32_t frameTime = 0;
         uint32_t maxTime = 0;   //The maximum time that we waited updating and rendering.
         uint32_t currentTime = SDL_GetTicks();
-
-        //A triangle:
-        Point v1;        v1.x = 100;       v1.y = 0;
-        Point v2;        v2.x = 100;       v2.y = 0;
-        Point v3;        v3.x = 50;        v3.y = 150;
-
-        //A button:
-        CreateTextButton(testFunction1, "Change!", buttonFont, 10, 50, 100, 30, 0xFF000000, screenSurface);
-        CreateTextButton(testFunction2, "Change 2!", buttonFont, 100, 150, 100, 30, 0xFF000000, screenSurface);
-        CreateTextButton(testFunction3, "Change three!", buttonFont, 150, 250, 50, 20, 0xFF000000, screenSurface);
 
         uint8_t keepRunning = 1;    //Main loop flag!   1 means "yes".
 
@@ -212,39 +175,35 @@ int main( int argc, char* args[] )
                             break;
                     }
                 }
-                else if(e.type == SDL_MOUSEMOTION || e.type == SDL_MOUSEBUTTONDOWN || e.type == SDL_MOUSEBUTTONUP)
-                    EventButtons(&e);
+                else
+                    Editor_EventsHandler(&e);
             }
 
+            //UPDATE:   ///////////////////////////////////////////////////////////////////////////////
+            Editor_Update();
+
+            //RENDER:   ///////////////////////////////////////////////////////////////////////////////
             //Playing with the PIXELS of the surface: /////////////////////////////////////////////////
             //Erase everything on the surface to white before drawing again:
             SDL_FillRect(screenSurface, NULL, 0xFFF000F0);
 
             SDL_LockSurface(screenSurface);
 
-            v1.x = 0;//rand() % SCREEN_WIDTH;
-            v1.y = SCREEN_HEIGHT;//rand() % SCREEN_HEIGHT;
-            v2.x = SCREEN_WIDTH; //rand() % SCREEN_WIDTH;
-            v2.y = SCREEN_HEIGHT; //rand() % SCREEN_HEIGHT;
-            v3.x = SCREEN_WIDTH / 2; //rand() % SCREEN_WIDTH;
-            v3.y = 0; //rand() % SCREEN_HEIGHT;
-
-            TriangleFlat(v1, v2, v3, triangleColor, screenSurface);
+            //Triangle drawing goes here, between lock and unlock:
 
             SDL_UnlockSurface(screenSurface);
             ///////////////////////////////////////////////////////////////////////////////////////////
 
-            //Draw button:
-            DrawButtons(screenSurface);
+            //Gui drawing goes here: ////////
+            Editor_Draw();
 
+            /////////////////////////////////
 
+            //render and draw Frame Time:
             textSurface = TTF_RenderText_Solid(textFont, frameTimeString, textColor);
-            //Is this surface in a different format than screenSurface?
-            //If thats the case, in each frame, a conversion occurs. Can this surface
-            //just be rendered with the same format?
-
             SDL_BlitSurface(textSurface, NULL, screenSurface, NULL);
 
+            //pixels of the surface to screen's texture:
             SDL_UpdateTexture(sdlTexture, NULL, pixels, pitch);
 
             //SDL_RenderClear(sdlRenderer);
@@ -256,7 +215,8 @@ int main( int argc, char* args[] )
 
         }
     SDL_FreeSurface(textSurface);
-    GUI_Quit();
+
+    //Clean and Quit the GUI:
 
     }
 

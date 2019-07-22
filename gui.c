@@ -1,22 +1,40 @@
 #include "gui.h"
 #include <string.h> //strlen
 
-Button** arrayGui = NULL;   //Array of pointers to gui elements/objects.
+GUI_Button** arrayGui = NULL;   //Array of pointers to gui elements/objects.
 int16_t arrayGuiSize = 0;
 
-//GUI_Init()
-//{
-//
-//}
+//The gui will be drawed inside of this surface:
+SDL_Surface* whereToDrawTheGui = NULL;
 
-Button* CreateTextButton(  void (*WhenClicked)(),
-                        const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
-                        uint16_t w, uint16_t h, uint32_t color, SDL_Surface* destSurface)
+void GUI_Init(SDL_Surface* destSurface)
 {
-    //Make the array bigger to hold the gui element created.
-    arrayGui = (Button*)realloc(arrayGui, (arrayGuiSize + 1) * sizeof(Button*) );
+//The newly created gui will be drawn inside of this surface:
+    whereToDrawTheGui = destSurface;
+}
+
+void GUI_Quit()
+{
+    for(int i = 0; i < arrayGuiSize; i++)
+    {
+        SDL_FreeSurface(arrayGui[i]->drawThisSurface);//    SDL_FreeSurface(button->textSurface); //free(button->text);
+        free(arrayGui[i]);
+        //arrayGuiSize--;
+    }
+    free(arrayGui);
+    arrayGui = NULL;
+    arrayGuiSize = 0;
+    whereToDrawTheGui = NULL;
+}
+
+GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
+                        const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
+                        uint16_t w, uint16_t h, uint32_t color)
+{
+    //Make the array bigger to hold the pointer to the new gui element:
+    arrayGui = (GUI_Button*)realloc(arrayGui, (arrayGuiSize + 1) * sizeof(GUI_Button*) );
     //Add one button to the array.
-    arrayGui[arrayGuiSize] = (Button*) malloc(sizeof(Button));
+    arrayGui[arrayGuiSize] = (GUI_Button*) malloc(sizeof(GUI_Button));
 
     //button->text = (char*) malloc(strlen(text) + 1);
 
@@ -34,9 +52,9 @@ Button* CreateTextButton(  void (*WhenClicked)(),
     //Final surface to draw each frame:
     //SDL_Rect rect = {x, y, w, h};
 
-    arrayGui[arrayGuiSize]->drawThisSurface = SDL_CreateRGBSurface(0, w, h, destSurface->format->BitsPerPixel,
-                                        destSurface->format->Rmask, destSurface->format->Gmask,
-                                        destSurface->format->Bmask, destSurface->format->Amask);
+    arrayGui[arrayGuiSize]->drawThisSurface = SDL_CreateRGBSurface(0, w, h, whereToDrawTheGui->format->BitsPerPixel,
+                                        whereToDrawTheGui->format->Rmask, whereToDrawTheGui->format->Gmask,
+                                        whereToDrawTheGui->format->Bmask, whereToDrawTheGui->format->Amask);
 
     //SDL_Surface* textSurfaceOptimized = SDL_ConvertSurface(textSurface, button->drawThisSurface->format, 0);
 
@@ -59,7 +77,7 @@ Button* CreateTextButton(  void (*WhenClicked)(),
 //    //button->text = (char*) realloc(button->text, strlen(text) + 1);
 ////    button->textSurface = TTF_RenderText_Solid(textFont, text, (SDL_Color){255, 255, 255, 255});
 //}
-void EventButtons(SDL_Event* e)   //Eliminate the second parameter. That function should be specified inside of the button struct.
+int8_t GUI_EventButtons(SDL_Event* e)   //Eliminate the second parameter. That function should be specified inside of the button struct.
 {
      //Get mouse position
      int x, y;
@@ -70,29 +88,23 @@ void EventButtons(SDL_Event* e)   //Eliminate the second parameter. That functio
          if(e->type == SDL_MOUSEBUTTONDOWN &&
                 x < (arrayGui[i]->w + arrayGui[i]->x) && x > arrayGui[i]->x &&
                 y < (arrayGui[i]->h + arrayGui[i]->y) && y > arrayGui[i]->y)
+        {
             arrayGui[i]->WhenClicked();
+            return 1;
+        }
     }
+    return 0;
 }
 
-void DrawButtons(SDL_Surface* destSurface)
+void GUI_DrawButtons()
 {
     SDL_Rect destRect;
     for(int i = 0; i < arrayGuiSize; i++)
     {
         destRect.x = arrayGui[i]->x; destRect.y = arrayGui[i]->y;
         destRect.w = arrayGui[i]->w; destRect.h = arrayGui[i]->h;
-        SDL_BlitSurface(arrayGui[i]->drawThisSurface, NULL, destSurface, &destRect);
+        SDL_BlitSurface(arrayGui[i]->drawThisSurface, NULL, whereToDrawTheGui, &destRect);
     }
-}
-void GUI_Quit()
-{
-    for(int i = 0; i < arrayGuiSize; i++)
-    {
-        SDL_FreeSurface(arrayGui[i]->drawThisSurface);//    SDL_FreeSurface(button->textSurface); //free(button->text);
-        free(arrayGui[i]);
-        //arrayGuiSize--;
-    }
-    free(arrayGui);
 }
 
 

@@ -3,7 +3,7 @@
 
 #include "shapes.h"
 
-typedef struct Button {
+typedef struct GUI_Button {
     uint16_t x, y;
     uint16_t w, h;
     //uint8_t visible;
@@ -16,20 +16,20 @@ typedef struct Button {
     //Functions that EventButton calls when certain event took place:
     void (*WhenClicked)();
     //Start with only that function, but later implement whenUnClicked and WhenPassedOver.
-} Button;
+} GUI_Button;
 
 //Create a button and add it to the internal array of gui elements:
 //If the user wants, can keep a pointer to the button created, so he can later pass it to
 //other functions to modify it, like change text, or direcrly change its position.
-Button* CreateTextButton(  void (*WhenClicked)(),
+GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
                             const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
-                            uint16_t w, uint16_t h, uint32_t color, SDL_Surface* destSurface);
+                            uint16_t w, uint16_t h, uint32_t color);
 //void ChangeTextOfButton(Button* button, TTF_Font* textFont, const char* text);
-void EventButtons(SDL_Event* e);
-void DrawButtons(SDL_Surface* destSurface);
-void DestroyButtons();
+int8_t GUI_EventButtons(SDL_Event* e);
+void GUI_DrawButtons();
+void GUI_DestroyButtons();
 
-//int     GUI_Init();     //To call before using any of the other functions. Inits array.
-void    GUI_Quit();     //To free all memory allocated for the array of buttons.
+void GUI_Init(SDL_Surface* destSurface);  //To call before using any of the other functions.
+void GUI_Quit();                    //To free all memory allocated for the array of buttons.
 
 #endif // GUI_H_INCLUDED

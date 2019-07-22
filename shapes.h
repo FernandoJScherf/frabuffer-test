@@ -25,10 +25,6 @@ typedef struct Point {
     float x, y;
 } Point;
 
-void FillUpTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface);
-void FillDownTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface);
-void FillTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface);
-
 //Let's try to do it better:
 //http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
 
