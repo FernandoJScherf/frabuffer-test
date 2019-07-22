@@ -99,12 +99,15 @@ char init()
     return 0;
 }
 
+uint32_t triangleColor = 0xFF000000;
 
 void testFunctionForClickedButton()
 {
     static int click = 0;
     printf("click %d!\n", click);
     click++;
+    triangleColor = rand();
+    printf("El color al azar es:  %d!\n", triangleColor);
 }
 
 int main( int argc, char* args[] )
@@ -137,7 +140,7 @@ int main( int argc, char* args[] )
         Point v3;        v3.x = 50;        v3.y = 150;
 
         //A button:
-        Button* button = CreateTextButton("hello button.", 0, 0, 100, 50, 0);
+        Button* button = CreateTextButton("hello button.", textFont, 10, 50, 100, 50, 0xFF000000, screenSurface);
 
         uint8_t keepRunning = 1;    //Main loop flag!   1 means "yes".
 
@@ -186,15 +189,14 @@ int main( int argc, char* args[] )
             v3.x = SCREEN_WIDTH / 2; //rand() % SCREEN_WIDTH;
             v3.y = 0; //rand() % SCREEN_HEIGHT;
 
-            TriangleFlat(v1, v2, v3, screenSurface);
+            TriangleFlat(v1, v2, v3, triangleColor, screenSurface);
 
+            SDL_UnlockSurface(screenSurface);
+            ///////////////////////////////////////////////////////////////////////////////////////////
 
             //Draw button:
             DrawButton(button, screenSurface);
 
-
-            SDL_UnlockSurface(screenSurface);
-            ///////////////////////////////////////////////////////////////////////////////////////////
 
             textSurface = TTF_RenderText_Solid(textFont, frameTimeString, textColor);
             //Is this surface in a different format than screenSurface?

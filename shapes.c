@@ -150,7 +150,7 @@ FillTriangle(Point v1, Point v2, Point v3, SDL_Surface* surface)
 }//This isn't working as it should at is not as efficient either.
 
 //http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
-TriangleFlat(Point v1, Point v2, Point v3, SDL_Surface* surface)
+TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surface)
 {
     //        v1 *
     //          / \         from top to bottom! v1.y <= v2.y <= v3.y
@@ -206,14 +206,14 @@ TriangleFlat(Point v1, Point v2, Point v3, SDL_Surface* surface)
     if(distance > 0)    //if (distance>0) the middle vertex v2 is on the left side
     {                   //(V1V3 is the longest edge on the right side)
         //A triangle is made out of two segments:
-        DrawSegment(v1.y, v2.y, v1.x, v1.x, dXdY_V1V2, dXdY_V1V3, surface);
-        DrawSegment(v2.y, v3.y, v2.x, v4.x, dXdY_V2V3, dXdY_V1V3, surface);
+        DrawSegment(v1.y, v2.y, v1.x, v1.x, dXdY_V1V2, dXdY_V1V3, argb, surface);
+        DrawSegment(v2.y, v3.y, v2.x, v4.x, dXdY_V2V3, dXdY_V1V3, argb, surface);
     }
     else                //and if (distance<0) then V1V3 is on the left side.
     {
         //A triangle is made out of two segments:
-        DrawSegment(v1.y, v2.y, v1.x, v1.x, dXdY_V1V3, dXdY_V1V2, surface);
-        DrawSegment(v2.y, v3.y, v4.x, v2.x, dXdY_V1V3, dXdY_V2V3, surface);
+        DrawSegment(v1.y, v2.y, v1.x, v1.x, dXdY_V1V3, dXdY_V1V2, argb, surface);
+        DrawSegment(v2.y, v3.y, v4.x, v2.x, dXdY_V1V3, dXdY_V2V3, argb, surface);
     }
 
     //A triangle is made out of two segments: v1.y to v2.y and v2.y to v3.y:
@@ -222,7 +222,7 @@ TriangleFlat(Point v1, Point v2, Point v3, SDL_Surface* surface)
 }
 
 static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
-                    float left_dXdY, float right_dXdY, SDL_Surface* surface)
+                    float left_dXdY, float right_dXdY, uint32_t argb, SDL_Surface* surface)
 {
     //pointer to the pixels of the surface:
     uint32_t *pixels = surface->pixels;
@@ -235,7 +235,7 @@ static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
         //draw current scanline, between currentX1 and currentX2:
         for(int currentXToDraw = leftX; currentXToDraw <= rightX; currentXToDraw++)
             //Draw a point:
-            pixels[currentXToDraw + surfaceW * scanlineY] = 0xFFFF0000; //Hardcoded, for now.
+            pixels[currentXToDraw + surfaceW * scanlineY] = argb; //Hardcoded, for now.
 
         //Calculate the next X1 and X2 to draw the next line:
         leftX   += left_dXdY;
