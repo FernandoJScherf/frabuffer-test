@@ -12,7 +12,7 @@ Button* CreateTextButton(const char* text, TTF_Font* textFont, uint16_t x, uint1
     //button->color = color;
 //    button->whereToDrawSurface = surface;
 
-    SDL_Surface* textSurface = TTF_RenderText_Solid(textFont, text, (SDL_Color){255, 255, 255,255});
+    SDL_Surface* textSurface = TTF_RenderText_Blended_Wrapped(textFont, text, (SDL_Color){255, 255, 255,255}, w);
 //    SDL_Surface* tempTextSurface = TTF_RenderText_Solid(textFont, text, (SDL_Color){255, 255, 255,255});
 //    button->textSurface = SDL_ConvertSurface(tempTextSurface, surface->format, 0);
 //    SDL_FreeSurface(tempTextSurface);
@@ -24,15 +24,17 @@ Button* CreateTextButton(const char* text, TTF_Font* textFont, uint16_t x, uint1
                                         destSurface->format->Rmask, destSurface->format->Gmask,
                                         destSurface->format->Bmask, destSurface->format->Amask);
 
-    SDL_Surface* textSurfaceOptimized = SDL_ConvertSurface(textSurface, button->drawThisSurface->format, 0);
+    //SDL_Surface* textSurfaceOptimized = SDL_ConvertSurface(textSurface, button->drawThisSurface->format, 0);
 
     SDL_FillRect(button->drawThisSurface, NULL, color);
 
     //SDL_Rect srcRect = {0, 0, textSurface->w, textSurface->h};
+    SDL_Rect dstRect = {(w - textSurface->w) / 2, (h - textSurface->h) / 2, textSurface->w, textSurface->h};
 
-    SDL_BlitScaled(textSurfaceOptimized, NULL, button->drawThisSurface, NULL);
+    //SDL_BlitScaled(textSurfaceOptimized, NULL, button->drawThisSurface, NULL);
+    SDL_BlitSurface(textSurface, NULL, button->drawThisSurface, &dstRect);
     SDL_FreeSurface(textSurface);
-    SDL_FreeSurface(textSurfaceOptimized);
+    //SDL_FreeSurface(textSurfaceOptimized);
     //printf("%d - %s\n", button->drawThisSurface    , SDL_GetError()    );
     return button;
 }

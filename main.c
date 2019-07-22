@@ -20,10 +20,16 @@ SDL_Renderer* sdlRenderer = NULL;
 SDL_Surface* screenSurface = NULL;
 SDL_Texture* sdlTexture = NULL;
 
+TTF_Font *textFont = NULL;
+TTF_Font *buttonFont = NULL;
 
 //The init and cleanAndClose functions, just to keep main a little bit more organized:
 void cleanAndClose()
 {
+    TTF_CloseFont(textFont);
+    TTF_CloseFont(buttonFont);
+    TTF_Quit();
+
     SDL_FreeSurface(screenSurface);
     SDL_DestroyRenderer(sdlRenderer);   //destroy the rendering context for a window and free associated textures. (So it's not necessary to free the individual sdlTexture).
     SDL_DestroyWindow(window);
@@ -95,6 +101,23 @@ char init()
         return 5;
     }
     printf("Screen's texture created without problems!\n");
+
+    if(TTF_Init() < 0) //Check for error.
+    {
+        printf("TTF_Init failed! TTF_GetError: %s\n: ", TTF_GetError());
+        return 6;
+    }
+
+    textFont = TTF_OpenFont("synchronizer_nbp.ttf", 16); //Check for error.
+    buttonFont = TTF_OpenFont("synchronizer_nbp.ttf", 8); //Check for error.
+
+    if(textFont == NULL || buttonFont == NULL)
+    {
+        printf("TTF_OpenFont failed! Probably the font is missiong! TTF_GetError: %s\n", TTF_GetError());
+        return 7;
+    }
+
+    printf("Font subsystem initializated without problems and fonts loaded!\n");
     printf("Initialization ended without problems!\n");
     return 0;
 }
@@ -120,9 +143,6 @@ int main( int argc, char* args[] )
         uint32_t *pixels = screenSurface->pixels;
         uint32_t pitch = screenSurface->pitch;
 
-        TTF_Init(); //Check for error.
-        TTF_Font *textFont = TTF_OpenFont("synchronizer_nbp.ttf", 16); //Check for error.
-
         SDL_Color textColor = {255,255,255};
         SDL_Surface *textSurface = NULL;
 
@@ -140,7 +160,7 @@ int main( int argc, char* args[] )
         Point v3;        v3.x = 50;        v3.y = 150;
 
         //A button:
-        Button* button = CreateTextButton("hello button.", textFont, 10, 50, 100, 50, 0xFF000000, screenSurface);
+        Button* button = CreateTextButton("Change!", buttonFont, 10, 50, 100, 30, 0xFF000000, screenSurface);
 
         uint8_t keepRunning = 1;    //Main loop flag!   1 means "yes".
 
@@ -215,6 +235,8 @@ int main( int argc, char* args[] )
             //SDL_Delay(100);
 
         }
+    SDL_FreeSurface(textSurface);
+    DestroyButton(button);
 
     }
 
