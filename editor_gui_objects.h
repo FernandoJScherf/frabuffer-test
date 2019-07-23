@@ -5,6 +5,8 @@
 
 #include "gui.h"
 
+SDL_Surface* editorSurface = NULL;
+
 TTF_Font *editorFont = NULL;
 
 typedef enum States {   None, Start_New_Triangle, Add_New_Point_To_Triangle, Finish_Triangle,
@@ -38,16 +40,19 @@ void Editor_Init(SDL_Surface* surface)
     if(editorFont == NULL)
         printf("TTF_OpenFont failed! Probably the font is missiong! TTF_GetError: %s\n", TTF_GetError());
 
-    GUI_Init(surface);
+    editorSurface = surface;
+
+    GUI_Init(editorSurface);
 
     GUI_CreateTextButton(   test1, "go to test1", editorFont,
-                            surface->w - 50, 10, 40, 20, 0xFF000000);
+                            editorSurface->w - 50, 10, 40, 20, 0xFF000000);
     GUI_CreateTextButton(   test2, "go to test2", editorFont,
-                            surface->w - 50, 40, 40, 20, 0xFF000000);
+                            editorSurface->w - 50, 40, 40, 20, 0xFF000000);
 }
 
 void Editor_Quit()
 {
+    SDL_FreeSurface(editorSurface);
     TTF_CloseFont(editorFont);
     GUI_Quit();
 }
@@ -88,10 +93,17 @@ void Editor_EventsHandler(SDL_Event* e)
                 printf("Point %d for triangle at x %f y %f \n", nPoint, arrayTri[arrayTriSize]->v[nPoint].x, arrayTri[arrayTriSize]->v[nPoint].y);
                 printf("Point %d for triangle at x %d y %d \n", nPoint, x, y);
                 if(++nPoint == 3)
-                    editorState = Finish_Triangle;
+                {
+                    editorState = Start_New_Triangle;
+                    arrayTriSize++;
+
+                }
+
             }
             break;
         case Finish_Triangle:
+            editorState = Start_New_Triangle;
+
 
             break;
 
@@ -107,8 +119,10 @@ void Editor_EventsHandler(SDL_Event* e)
 void Editor_Draw()
 {
     GUI_DrawButtons();
-//    TriangleFlat(   arrayTri[arrayTriSize]->v[0], arrayTri[arrayTriSize]->v[1],
-//                    arrayTri[arrayTriSize]->v[2], 0xFFFFFFFF, );
+    //if(arrayTriSize > 0)
+    for(int i = 0; i < arrayTriSize; i++)
+        TriangleFlat(   arrayTri[i]->v[0], arrayTri[i]->v[1], arrayTri[i]->v[2],
+                        0xFFFFFFFF, editorSurface);
 }
 
 void Editor_Update()
