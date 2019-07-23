@@ -9,8 +9,8 @@ SDL_Surface* editorSurface = NULL;
 
 TTF_Font *editorFont = NULL;
 
-typedef enum States {   None, Start_New_Triangle, Add_New_Point_To_Triangle, Finish_Triangle,
-                        Start_New_Poly  } States;
+typedef enum States {   None, Start_New_Triangle, Add_New_Point_To_Triangle,
+                        Start_New_Poly, Add_New_Point_To_Poly  } States;
 
 States editorState = None;
 
@@ -22,17 +22,31 @@ typedef struct Triangle {
 Triangle** arrayTri = NULL;   //Array of pointers to triangles elements/objects.
 int16_t arrayTriSize = 0;
 
-//Functions: ////////////////////////////////////////////////////////////////////////
+typedef struct Poly {
+    Triangle** t;        //A pointer to a dynamic array of pointers to triangles (That will be in the array of triangles).
+    int16_t tSize;      //The size of the array of triangles.
+    int32_t color;      //The color of the polygon.
+} Poly;
+
+Poly** arrayPoly = NULL;
+int16_t arrayPolySize = 0;
+
+//Button's Functions: //////////////////////////////////////////////////////////////////////
 void test1()
 {
+//Probably the simplest solution would be to implement here specific logic to handle
+//From what state you are entering and to what step you are going. This buttons could
+//Prepare everything so that later we could create triangles and polygons
+//without problems.
     printf("click1. \n");
-    editorState = Start_New_Triangle;
+    editorState = Add_New_Point_To_Triangle;
 }
 void test2()
 {
     printf("click2. \n");
-    editorState = Start_New_Poly;
+    editorState = Add_New_Point_To_Poly;
 }
+////////////////////////////////////////////////////////////////////////////////////////////
 
 void Editor_Init(SDL_Surface* surface)
 {
@@ -59,9 +73,11 @@ void Editor_Quit()
 
 void Editor_EventsHandler(SDL_Event* e)
 {
-    if(GUI_EventButtons(e))        //If a click was registered on any of the gui elements, return.
+    if(GUI_EventButtons(e))        //If a click was registered on any of the gui elements, return;
         return;
     //If we continue, it means the click was on a drawable part of the surface:
+
+    //Get mouse position:
     int x, y;
     SDL_GetMouseState( &x, &y );
 
@@ -72,48 +88,87 @@ void Editor_EventsHandler(SDL_Event* e)
         case None:
 
             break;
-        case Start_New_Triangle:
-            //Get mouse position
-            if(e->type == SDL_MOUSEBUTTONDOWN)
-            {
-                //Make the array bigger to hold the new pointer to a triangle:
-                arrayTri = (Triangle*)realloc(arrayTri, (arrayTriSize + 1) * sizeof(Triangle*) );
-                //Add one triangle to the array:
-                arrayTri[arrayTriSize] = (Triangle*) malloc(sizeof(Triangle));
-
-                editorState = Add_New_Point_To_Triangle;
-                nPoint = 0;
-            }
-            //break; Without the break it adds already the first point!
         case Add_New_Point_To_Triangle:
+
             if(e->type == SDL_MOUSEBUTTONDOWN)
             {
+                if(nPoint == 0)
+                {
+                    //If it's the first vertex of the triangle, we need to allocate memory:
+                    //Make the array bigger to hold the new pointer to a triangle:
+                    arrayTri = (Triangle*)realloc(arrayTri, (arrayTriSize + 1) * sizeof(Triangle*) );
+                    //Add one triangle to the array:
+                    arrayTri[arrayTriSize] = (Triangle*) malloc(sizeof(Triangle));
+                }
+
+
+                //Then we specify the point:
                 arrayTri[arrayTriSize]->v[nPoint].x = x;
                 arrayTri[arrayTriSize]->v[nPoint].y = y;
-                printf("Point %d for triangle at x %f y %f \n", nPoint, arrayTri[arrayTriSize]->v[nPoint].x, arrayTri[arrayTriSize]->v[nPoint].y);
+
                 printf("Point %d for triangle at x %d y %d \n", nPoint, x, y);
+                printf("arrayTri[arrayTriSize] .. arrayTri[%d] ==  %d \n", arrayTriSize, arrayTri[arrayTriSize]);
+
+                //If it was the last one, the next click has to start again at point 0.
                 if(++nPoint == 3)
                 {
-                    editorState = Start_New_Triangle;
+                    //editorState = Start_New_Triangle;
+                    arrayTriSize++;
+                    nPoint = 0;
+                }
+
+            }
+            break;
+
+        case Add_New_Point_To_Poly:
+
+            if(e->type == SDL_MOUSEBUTTONDOWN)
+            {
+                if(nPoint == 0 || nPoint >= 3)
+                {
+                    //If it's the first vertex of the triangle, we need to allocate memory:
+                    //Make the array bigger to hold the new pointer to a triangle:
+                    arrayTri = (Triangle*)realloc(arrayTri, (arrayTriSize + 1) * sizeof(Triangle*) );
+                    //Add one triangle to the array:
+                    arrayTri[arrayTriSize] = (Triangle*) malloc(sizeof(Triangle));
+
+                }
+
+                if(nPoint < 3)
+                {
+                    //We specify the new point:
+                    arrayTri[arrayTriSize]->v[nPoint].x = x;
+                    arrayTri[arrayTriSize]->v[nPoint].y = y;
+                }
+                else
+                {
+                    //We specify the points that we already know:
+                    arrayTri[arrayTriSize]->v[0].x = arrayTri[arrayTriSize-1]->v[1].x;
+                    arrayTri[arrayTriSize]->v[0].y = arrayTri[arrayTriSize-1]->v[1].y;
+                    arrayTri[arrayTriSize]->v[1].x = arrayTri[arrayTriSize-1]->v[2].x;
+                    arrayTri[arrayTriSize]->v[1].y = arrayTri[arrayTriSize-1]->v[2].y;
+                    //We specify the new point:
+                    arrayTri[arrayTriSize]->v[2].x = x;
+                    arrayTri[arrayTriSize]->v[2].y = y;
+                }
+
+                printf("Point %d for triangle at x %d y %d \n", nPoint, x, y);
+                printf("arrayTri[arrayTriSize] .. arrayTri[%d] ==  %d \n", arrayTriSize, arrayTri[arrayTriSize]);
+
+                //If it was the last one, the next click has to create a new triangle
+                //Starting with the last two vertices:
+                if(++nPoint >= 3)
+                {
+                    //If it's the first vertex of new triangle, we need to allocate memory:
                     arrayTriSize++;
 
                 }
 
             }
-            break;
-        case Finish_Triangle:
-            editorState = Start_New_Triangle;
-
-
-            break;
-
-
-        case Start_New_Poly:
-            if(e->type == SDL_MOUSEBUTTONDOWN)
-                printf("New point for poly at x %d y %d \n", x, y);
-            break;
+            break;  //When we are drawing a triangle and then change to a poly, or vice-versa, the triangle
+                    //starts being drawn again, and the pointer to the triangle that was being drawn before
+                    //GETS LOTS! MEMORY LEAK!
     }
-
 }
 
 void Editor_Draw()
