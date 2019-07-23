@@ -1,3 +1,3 @@
 # framebuffer-test
 
-The first steps towards a engine that can render software polygons with SDL 2.
+Trying to build a graphics editor based on software polygons.
