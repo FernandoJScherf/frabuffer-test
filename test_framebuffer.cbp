@@ -36,6 +36,9 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="editor_gui_objects.c">
+			<Option compilerVar="CC" />
+		</Unit>
 		<Unit filename="editor_gui_objects.h" />
 		<Unit filename="gui.c">
 			<Option compilerVar="CC" />
