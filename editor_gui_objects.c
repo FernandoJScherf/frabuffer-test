@@ -58,9 +58,9 @@ void Editor_Init(SDL_Surface* surface)
     GUI_Init(editorSurface);
 
     GUI_CreateTextButton(   test1, "go to test1", editorFont,
-                            editorSurface->w - 50, 10, 40, 20, 0xFF000000);
+                            editorSurface->w - 60, 10, 40, 30, 0xFF000000);
     GUI_CreateTextButton(   test2, "go to test2", editorFont,
-                            editorSurface->w - 50, 40, 40, 20, 0xFF000000);
+                            editorSurface->w - 60, 60, 40, 30, 0xFF000000);
 }
 
 void Editor_Quit()
@@ -104,6 +104,9 @@ static void Triangle_DestroyLast()
 
 //The counter of placed points for the new triangle or polygon:
 static int16_t nPoint = 0;
+//The counter of points to make lines:
+static uint8_t pointsForLinesLastPos = 0;
+static SDL_Point pointsForLines[4];
 void Editor_EventsHandler(SDL_Event* e)
 {
     if(GUI_EventButtons(e))        //If a click was registered on any of the gui elements, return;
@@ -120,7 +123,7 @@ void Editor_EventsHandler(SDL_Event* e)
 
             break;
         case Add_New_Point_To_Triangle:
-
+        ///////////////////////////////////////////////////////////////////////////////////////
             if(e->type == SDL_MOUSEBUTTONDOWN)
             {
                 if(nPoint == 0)
@@ -129,19 +132,76 @@ void Editor_EventsHandler(SDL_Event* e)
                 //Then we specify the point:
                 Triangle_AddPoint(nPoint, x, y);
 
-                //If it was the last one, the next click has to start again at point 0.
+                //If it was the last point, the next click has to start again at point 0:
                 if(++nPoint == 3)
                 {
+                    //Prepare everything for next triangle:
                     arrayTriLastPos++;
                     nPoint = 0;
                 }
 
+                //Logic to draw the helping lines:
+                switch(pointsForLinesLastPos)
+                {
+                    case 0:
+                        //Only when we click, a new point to draw the helping line is created:
+                        pointsForLines[0].x = x;
+                        pointsForLines[0].y = y;
+
+                        //Inmediatly initialize the next point, that will be actualized
+                        //any time the mouse moves (Or else a line is drawn from (0,0)
+                        //or the last point placed of the last triangle):
+                        pointsForLines[1].x = x;
+                        pointsForLines[1].y = y;
+
+                        pointsForLinesLastPos = 1;
+                        break;
+                    case 1:
+                        //Point 0 and point 1 need to be fixed: Is the already drawn line.
+                        //Point 0 was fixed in case 0, now we fix point 1, and in case 0
+                        //was the mouse position:
+                        pointsForLines[1].x = x;
+                        pointsForLines[1].y = y;
+
+                        //The last point coincides with the first point!
+                        pointsForLines[3].x = pointsForLines[0].x;
+                        pointsForLines[3].y = pointsForLines[0].y;
+
+                        //Inmediatly initialize the next point, that will be actualized
+                        //any time the mouse moves (Or else a line is drawn from (0,0)
+                        //or the last point placed of the last triangle):
+                        pointsForLines[2].x = x;
+                        pointsForLines[2].y = y;
+
+                        pointsForLinesLastPos = 3;    //We will need not only one new line, but two.
+                        break;
+                    case 3:
+                        pointsForLinesLastPos = 0;
+                        break;
+                }
 
             }
+
+            if(e->type == SDL_MOUSEMOTION)
+            {
+                //When the mouse moves, and a triangle is being created, the last line goes
+                //from the last point being placed to the mouse position:
+                switch(pointsForLinesLastPos)
+                {
+                    case 1:
+                        pointsForLines[1].x = x;
+                        pointsForLines[1].y = y;
+                        break;
+                    case 3:
+                    //This point is between point 1, now fixed, and point 3 == point 0, also fixed:
+                        pointsForLines[2].x = x;
+                        pointsForLines[2].y = y;
+                }
+            }
             break;
-
+        ///////////////////////////////////////////////////////////////////////////////////////
         case Add_New_Point_To_Poly:
-
+        ///////////////////////////////////////////////////////////////////////////////////////
             if(e->type == SDL_MOUSEBUTTONDOWN)
             {
                 if(nPoint == 0 || nPoint == 3)
@@ -151,6 +211,7 @@ void Editor_EventsHandler(SDL_Event* e)
                 if(nPoint < 3)
                 {
                     Triangle_AddPoint(nPoint, x, y);
+
                     if(++nPoint == 3)
                         arrayTriLastPos++;
                 }
@@ -167,17 +228,93 @@ void Editor_EventsHandler(SDL_Event* e)
 
                     arrayTriLastPos++;
                 }
+                //Logic to draw the helping lines:
+                switch(pointsForLinesLastPos)
+                {
+                    case 0:
+                        //Only when we click, a new point to draw the helping line is created:
+                        pointsForLines[0].x = x;
+                        pointsForLines[0].y = y;
 
+                        //Inmediatly initialize the next point, that will be actualized
+                        //any time the mouse moves (Or else a line is drawn from (0,0)
+                        //or the last point placed of the last triangle):
+                        pointsForLines[1].x = x;
+                        pointsForLines[1].y = y;
 
-                //If we are already working with a polygon more complex than a triangle,
-                //the next click has to create a new triangle:
+                        pointsForLinesLastPos = 1;
+                        break;
+                    case 1:
+                        //Point 0 and point 1 need to be fixed: Is the already drawn line.
+                        //Point 0 was fixed in case 0, now we fix point 1, and in case 0
+                        //was the mouse position:
+                        pointsForLines[1].x = x;
+                        pointsForLines[1].y = y;
 
+                        //The last point coincides with the first point!
+                        pointsForLines[3].x = pointsForLines[0].x;
+                        pointsForLines[3].y = pointsForLines[0].y;
 
+                        //Inmediatly initialize the next point, that will be actualized
+                        //any time the mouse moves (Or else a line is drawn from (0,0)
+                        //or the last point placed of the last triangle):
+                        pointsForLines[2].x = x;
+                        pointsForLines[2].y = y;
+
+                        pointsForLinesLastPos = 3;    //We will need not only one new line, but two.
+                        break;
+                    //case 3:
+                    default:
+                        //pointsForLinesLastPos = 0;
+
+                        //Point 0 and point 1 need to be fixed: Is the already drawn line.
+                        //Point 0 was fixed in case 0, now we fix point 1, and in case 0
+                        //was the mouse position:
+                        pointsForLines[0].x = pointsForLines[1].x;
+                        pointsForLines[0].y = pointsForLines[1].y;
+
+                        //The last point coincides with the first point!
+                        pointsForLines[1].x = pointsForLines[2].x;
+                        pointsForLines[1].y = pointsForLines[2].y;
+
+                        //Inmediatly initialize the next point, that will be actualized
+                        //any time the mouse moves (Or else a line is drawn from (0,0)
+                        //or the last point placed of the last triangle):
+                        pointsForLines[2].x = x;
+                        pointsForLines[2].y = y;
+
+                        pointsForLines[3].x = pointsForLines[0].x;
+                        pointsForLines[3].y = pointsForLines[0].y;
+
+                        break;
+                }
             }
-            break;  //When we are drawing a triangle and then change to a poly, or vice-versa, the triangle
-                    //starts being drawn again, and the pointer to the triangle that was being drawn before
-                    //GETS LOTS! MEMORY LEAK! Solved I think...
+
+            if(e->type == SDL_MOUSEMOTION)
+            {
+                //When the mouse moves, and a triangle is being created, the last line goes
+                //from the last point being placed to the mouse position:
+                switch(pointsForLinesLastPos)
+                {
+                    case 1:
+                        pointsForLines[1].x = x;
+                        pointsForLines[1].y = y;
+                        break;
+                    //case 3:
+                    default:
+                    //This point is between point 1, now fixed, and point 3 == point 0, also fixed:
+                        pointsForLines[2].x = x;
+                        pointsForLines[2].y = y;
+                }
+            }
+            break;
+        ///////////////////////////////////////////////////////////////////////////////////////
     }
+}
+
+void Editor_Update()
+{
+
 }
 
 void Editor_Draw()
@@ -187,6 +324,16 @@ void Editor_Draw()
     for(int i = 0; i < arrayTriLastPos; i++)
         TriangleFlat(   arrayTri[i]->v[0], arrayTri[i]->v[1], arrayTri[i]->v[2],
                         arrayTri[i]->color, editorSurface);
+
+    //We have to draw the gui helping lines when we have enough points to do it!
+    if(pointsForLinesLastPos > 0)
+    {
+        for(int i = 1; i <= pointsForLinesLastPos; i++)
+            LineBresenham(  pointsForLines[i].x, pointsForLines[i].y,
+                            pointsForLines[i-1].x, pointsForLines[i-1].y, 0, editorSurface);
+            //LineBresenham(  pointsForLines[i].x, pointsForLines[i].y, x, y, 0, editorSurface);
+    }
+
 }
 
 void Editor_Change_State(States newState)

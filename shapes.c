@@ -1,4 +1,5 @@
 #include "shapes.h"
+#include <math.h> //Abs
 
 // http://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html#sunbresenhamarticle
 
@@ -7,7 +8,7 @@ static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
 {
     //pointer to the pixels of the surface:
     uint32_t *pixels = surface->pixels;
-    //Let's access the width only once and save them for later:
+    //Let's access the width only once and save it for later:
     uint16_t surfaceW = surface->w;
 
     //for every scanline:
@@ -16,7 +17,7 @@ static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
         //draw current scanline, between currentX1 and currentX2:
         for(int currentXToDraw = leftX; currentXToDraw <= rightX; currentXToDraw++)
             //Draw a point:
-            pixels[currentXToDraw + surfaceW * scanlineY] = argb; //Hardcoded, for now.
+            pixels[currentXToDraw + surfaceW * scanlineY] = argb;
 
         //Calculate the next X1 and X2 to draw the next line:
         leftX   += left_dXdY;
@@ -244,7 +245,29 @@ void TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surf
     //printf("v1.y: %f, v2.y: %f, v3.y: %f\n", v1.y, v2.y, v3.y);
 }
 
+void LineBresenham( uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1,
+                    uint32_t argb, SDL_Surface* surface)
+{
+    //pointer to the pixels of the surface:
+    uint32_t *pixels = surface->pixels;
+    //Let's access the width only once and save it for later:
+    uint16_t surfaceW = surface->w;
 
+    int dx =  abs(x1-x0), sx = x0<x1 ? 1 : -1;
+    int dy = -abs(y1-y0), sy = y0<y1 ? 1 : -1;
+    int err = dx+dy, e2; /* error value e_xy */
+
+    for(;;) /* loop */
+    {
+        //Draw a point:
+        pixels[x0 + surfaceW * y0] = argb;
+
+        if (x0==x1 && y0==y1) break;
+        e2 = 2*err;
+        if (e2 >= dy) { err += dy; x0 += sx; } /* e_xy+e_x > 0 */
+        if (e2 <= dx) { err += dx; y0 += sy; } /* e_xy+e_y < 0 */
+    }
+}
 
 
 

@@ -32,4 +32,7 @@ void TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surf
 //static void DrawSegment( int topY, int bottomY, float leftX, float rightX,
 //                    float left_dXdY, float right_dXdY, uint32_t argb, SDL_Surface* surface);
 
+void LineBresenham( uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1,
+                    uint32_t argb, SDL_Surface* surface);
+
 #endif // SHAPES_H_INCLUDED

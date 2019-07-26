@@ -61,7 +61,8 @@ GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
     SDL_FillRect(arrayGui[arrayGuiSize]->drawThisSurface, NULL, color);
 
     //SDL_Rect srcRect = {0, 0, textSurface->w, textSurface->h};
-    SDL_Rect dstRect = {    (w - arrayGui[arrayGuiSize]->w) / 2, (h - textSurface->h) / 2,
+    //That +3 is just to separate the text a little from the left margin.
+    SDL_Rect dstRect = {    (w - textSurface->w) / 2 + 3, (h - textSurface->h) / 2,
                             textSurface->w, textSurface->h};
 
     //SDL_BlitScaled(textSurfaceOptimized, NULL, button->drawThisSurface, NULL);
@@ -69,6 +70,12 @@ GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
     SDL_FreeSurface(textSurface);
     //SDL_FreeSurface(textSurfaceOptimized);
     //printf("%d - %s\n", button->drawThisSurface    , SDL_GetError()    );
+
+    LineBresenham(0, 0, w-1, 0, 0xFFFFFFFF, arrayGui[arrayGuiSize]->drawThisSurface);
+    LineBresenham(w-1, 0, w-1, h-1, 0xFFFFFFFF, arrayGui[arrayGuiSize]->drawThisSurface);
+    LineBresenham(0, 0, 0, h-1, 0xFFFFFFFF, arrayGui[arrayGuiSize]->drawThisSurface);
+    LineBresenham(0, h-1, w-1, h-1, 0xFFFFFFFF, arrayGui[arrayGuiSize]->drawThisSurface);
+
     arrayGuiSize++;
     return arrayGui[arrayGuiSize];
 }

@@ -13,7 +13,7 @@ void Editor_EventsHandler(SDL_Event* e);
 
 void Editor_Draw();
 
-//void Editor_Update();
+void Editor_Update();
 
 void Editor_Change_State();
 

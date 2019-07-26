@@ -180,7 +180,7 @@ int main( int argc, char* args[] )
             }
 
             //UPDATE:   ///////////////////////////////////////////////////////////////////////////////
-//            Editor_Update();
+            Editor_Update();
 
             //RENDER:   ///////////////////////////////////////////////////////////////////////////////
             //Playing with the PIXELS of the surface: /////////////////////////////////////////////////
@@ -196,6 +196,9 @@ int main( int argc, char* args[] )
 
             //Gui drawing goes here: ////////
             Editor_Draw();
+
+            //Test line drawing:
+            //LineBresenham(0,0,SCREEN_WIDTH,SCREEN_HEIGHT,0,screenSurface);
 
             /////////////////////////////////
 
