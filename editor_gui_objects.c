@@ -354,6 +354,7 @@ void Editor_Change_State(States newState)
                 printf("Destroyed the last traignle.\n");
             }
             nPoint = 0;
+            pointsForLinesLastPos = 0;
             break;
         default:
             printf("Invalid current state!\n");
