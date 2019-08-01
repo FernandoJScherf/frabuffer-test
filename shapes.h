@@ -35,4 +35,6 @@ void TriangleFlat(Point v1, Point v2, Point v3, uint32_t argb, SDL_Surface* surf
 void LineBresenham( uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1,
                     uint32_t argb, SDL_Surface* surface);
 
+void PolyFlat(const Point* points, uint16_t nPoitns, uint32_t argb, SDL_Surface* surface);
+
 #endif // SHAPES_H_INCLUDED
