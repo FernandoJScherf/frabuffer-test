@@ -87,6 +87,7 @@ void Editor_Quit()
 }
 
 //The counter of placed points for the new triangle or polygon:
+static uint16_t whereToPutPoint = 0;
 void Editor_EventsHandler(SDL_Event* e)
 {
     if(GUI_EventButtons(e))        //If a click was registered on any of the gui elements, return;
@@ -113,13 +114,24 @@ void Editor_EventsHandler(SDL_Event* e)
                 workPoly->points = realloc(workPoly->points, ++(workPoly->pointsSize) * sizeof(Point));
 
                 printf("%d, %d\n", arrayPoly[arrayPolySize - 1].points, arrayPoly[arrayPolySize - 1].pointsSize);
-//                printf("%d, %d\n", arrayPoly[arrayPolySize - 1].points[pointsSi])
 
-//                 = (Point*) realloc (*workPoint, ( ++wPSize ) * sizeof(Point));
+                //And assign the addecuate values to the points:
+                if(whereToPutPoint >= (workPoly->pointsSize - 1))
+                {
+                    workPoly->points[whereToPutPoint].x = x;
+                    workPoly->points[whereToPutPoint].y = y;
+                    printf("whereToPutPoint normal %d\n", whereToPutPoint);
+                }
+                else
+                {
+                    for(int i = workPoly->pointsSize - 1; i > whereToPutPoint; i--)
+                        workPoly->points[i] = workPoly->points[i - 1];
 
-                //And assign the addecuate values to said point:
-                workPoly->points[workPoly->pointsSize - 1].x = x;
-                workPoly->points[workPoly->pointsSize - 1].y = y;
+                    workPoly->points[whereToPutPoint].x = x;
+                    workPoly->points[whereToPutPoint].y = y;
+                    printf("whereToPutPoint special %d\n", whereToPutPoint);
+                }
+                whereToPutPoint++;
             }
             //////////
             else if(e->type == SDL_MOUSEMOTION && workPoly->pointsSize > 2)
@@ -132,23 +144,13 @@ void Editor_EventsHandler(SDL_Event* e)
             //////////
             else if(e->type == SDL_KEYDOWN)
             {
-                Point bucket;
                 switch( e->key.keysym.sym )
                 {
                     case SDLK_RIGHT:
-                        for(int i = 0; i < workPoly->pointsSize; i++)
-                            printf("before: i %d,  x %f, y %f \n", i, workPoly->points[i].x, workPoly->points[i].y);
-
-                        //Move all elements inside array of points to the right:
-                        bucket = workPoly->points[workPoly->pointsSize - 1]; //Save the last posintion in a bucket.
-
-                        for(int i = workPoly->pointsSize - 1; i > 0; i--)
-                            workPoly->points[i] = workPoly->points[i - 1];
-
-                        workPoly->points[0] = bucket;
-
-                        for(int i = 0; i < workPoly->pointsSize; i++)
-                            printf("now: i %d, x %f, y %f \n", i, workPoly->points[i].x, workPoly->points[i].y);
+                        if(whereToPutPoint >= (workPoly->pointsSize - 1))
+                            whereToPutPoint = 1;
+                        else
+                            whereToPutPoint++;
 
                         break;
                     case SDLK_LEFT:
@@ -180,12 +182,12 @@ void Editor_Draw()
         {
             //Mini triangle to mark a point:
             Point v1, v2, v3;
-            v1.x = arrayPoly[i].points[j].x - 10;   //HARDCODING IS BAD!
-            v1.y = arrayPoly[i].points[j].y + 10;
+            v1.x = arrayPoly[i].points[j].x - 4;   //HARDCODING IS BAD!
+            v1.y = arrayPoly[i].points[j].y + 4;
             v2.x = arrayPoly[i].points[j].x;        //HARDCODING IS BAD!
-            v2.y = arrayPoly[i].points[j].y - 10;
-            v3.x = arrayPoly[i].points[j].x + 10;   //HARDCODING IS BAD! Also, this could be buttons!!!
-            v3.y = arrayPoly[i].points[j].y + 10;
+            v2.y = arrayPoly[i].points[j].y - 4;
+            v3.x = arrayPoly[i].points[j].x + 4;   //HARDCODING IS BAD! Also, this could be buttons!!!
+            v3.y = arrayPoly[i].points[j].y + 4;
             TriangleFlat(v1, v2, v3, j * 50, editorSurface);
         }
 
@@ -223,6 +225,7 @@ void Editor_Change_State(States newState)
             arrayPoly[arrayPolySize - 1].color = 0xFF00FF0F;
             arrayPoly[arrayPolySize - 1].pointsSize = 0;
             arrayPoly[arrayPolySize - 1].zOrder = 0;
+            whereToPutPoint = 0;
             break;
         default:
             printf("Invalid new state!\n");
