@@ -125,7 +125,7 @@ void PolyFlat(const Point* points, uint16_t nPoints, uint32_t argb, SDL_Surface*
 {
     for(int i = 2; i < nPoints; i++)
     {
-        TriangleFlat(points[0], points[i-1], points[i], argb + i * 10, surface);
+        TriangleFlat(points[0], points[i-1], points[i], argb + i * 100, surface);
             // + i * 10 is only to show every triangle that makes the poly.
     }
 }

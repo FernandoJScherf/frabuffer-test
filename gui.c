@@ -2,7 +2,7 @@
 #include <string.h> //strlen
 
 GUI_Button** arrayGui = NULL;   //Array of pointers to gui elements/objects.
-int16_t arrayGuiSize = 0;
+uint16_t arrayGuiSize = 0;
 
 //The gui will be drawed inside of this surface:
 SDL_Surface* whereToDrawTheGui = NULL;

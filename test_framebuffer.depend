@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1564077352 source:/home/fjs/sdlProjects/test_framebuffer/main.c
+1564768738 source:/home/fjs/sdlProjects/test_framebuffer/main.c
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<stdio.h>
@@ -7,7 +7,7 @@
 	"shapes.h"
 	"editor_gui_objects.h"
 
-1564325787 /home/fjs/sdlProjects/test_framebuffer/shapes.h
+1564775075 /home/fjs/sdlProjects/test_framebuffer/shapes.h
 	<SDL2/SDL.h>
 	<SDL2/SDL_ttf.h>
 	<stdio.h>
@@ -27,6 +27,6 @@
 1564161544 /home/fjs/sdlProjects/test_framebuffer/editor_gui_objects.h
 	"gui.h"
 
-1564698700 source:/home/fjs/sdlProjects/test_framebuffer/editor_gui_objects.c
+1564775810 source:/home/fjs/sdlProjects/test_framebuffer/editor_gui_objects.c
 	"editor_gui_objects.h"
 

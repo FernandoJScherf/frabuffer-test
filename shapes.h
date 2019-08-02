@@ -6,6 +6,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+//If I want to port to DOS:
+//http://www.brackeen.com/vga/index.html
+//(Also talks about Primitive Shapes and Lines!
+
 // lineas:
 //https://www.freecodecamp.org/news/how-to-code-your-first-algorithm-draw-a-line-ca121f9a1395/
 //http://members.chello.at/easyfilter/bresenham.html

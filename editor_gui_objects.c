@@ -13,7 +13,7 @@ typedef struct Poly {
 } Poly;
 
 //Later I could try implementing different types of Polys, maybe adding a
-//typedef enum PolyType { Flat, Textured, Gouraud, Noise(rand()) and other effects } PolyType;
+//typedef enum PolyType { Flat, Textured, Gouraud, Dither, DitherTransparency, Noise(rand()) and other effects } PolyType;
 //and a PolyType type member inside of the sctruct. Then implementing the appropiate
 //rendering functions in shapes.c
 
@@ -104,11 +104,11 @@ void Editor_EventsHandler(SDL_Event* e)
             break;
         case Add_New_Point_To_Poly:
         ///////////////////////////////////////////////////////////////////////////////////////
+        {
+            Poly* workPoly = &(arrayPoly[arrayPolySize - 1]);
             if(e->type == SDL_MOUSEBUTTONDOWN)
             {
                 //When we add a new point, we need to allocate new memory for a new point:
-
-                Poly* workPoly = &(arrayPoly[arrayPolySize - 1]);
 
                 workPoly->points = realloc(workPoly->points, ++(workPoly->pointsSize) * sizeof(Point));
 
@@ -121,7 +121,42 @@ void Editor_EventsHandler(SDL_Event* e)
                 workPoly->points[workPoly->pointsSize - 1].x = x;
                 workPoly->points[workPoly->pointsSize - 1].y = y;
             }
+            //////////
+            else if(e->type == SDL_MOUSEMOTION && workPoly->pointsSize > 2)
+            {
+                //And assign the addecuate values to said point:
+//                workPoly->points[workPoly->pointsSize - 1].x = x;
+//                workPoly->points[workPoly->pointsSize - 1].y = y;
+                //printf("x: %d, y: %d \n", x, y);
+            }
+            //////////
+            else if(e->type == SDL_KEYDOWN)
+            {
+                Point bucket;
+                switch( e->key.keysym.sym )
+                {
+                    case SDLK_RIGHT:
+                        for(int i = 0; i < workPoly->pointsSize; i++)
+                            printf("before: i %d,  x %f, y %f \n", i, workPoly->points[i].x, workPoly->points[i].y);
 
+                        //Move all elements inside array of points to the right:
+                        bucket = workPoly->points[workPoly->pointsSize - 1]; //Save the last posintion in a bucket.
+
+                        for(int i = workPoly->pointsSize - 1; i > 0; i--)
+                            workPoly->points[i] = workPoly->points[i - 1];
+
+                        workPoly->points[0] = bucket;
+
+                        for(int i = 0; i < workPoly->pointsSize; i++)
+                            printf("now: i %d, x %f, y %f \n", i, workPoly->points[i].x, workPoly->points[i].y);
+
+                        break;
+                    case SDLK_LEFT:
+
+                        break;
+                }
+            }
+        }
             break;
         ///////////////////////////////////////////////////////////////////////////////////////
     }
@@ -140,6 +175,20 @@ void Editor_Draw()
     for(int i = 0; i < arrayPolySize; i++)
     {
         PolyFlat(arrayPoly[i].points, arrayPoly[i].pointsSize, arrayPoly[i].color, editorSurface);
+
+        for(int j = 0; j < arrayPoly[i].pointsSize; j++)
+        {
+            //Mini triangle to mark a point:
+            Point v1, v2, v3;
+            v1.x = arrayPoly[i].points[j].x - 10;   //HARDCODING IS BAD!
+            v1.y = arrayPoly[i].points[j].y + 10;
+            v2.x = arrayPoly[i].points[j].x;        //HARDCODING IS BAD!
+            v2.y = arrayPoly[i].points[j].y - 10;
+            v3.x = arrayPoly[i].points[j].x + 10;   //HARDCODING IS BAD! Also, this could be buttons!!!
+            v3.y = arrayPoly[i].points[j].y + 10;
+            TriangleFlat(v1, v2, v3, j * 50, editorSurface);
+        }
+
     }
 
     //Draw surfaces:
@@ -171,7 +220,7 @@ void Editor_Change_State(States newState)
             //If it's the first point of a new poly, we need to allocate memory:
             arrayPoly = realloc(arrayPoly, ( ++arrayPolySize ) * sizeof(Poly));
             arrayPoly[arrayPolySize - 1].points = malloc(sizeof(Point));
-            arrayPoly[arrayPolySize - 1].color = 0;
+            arrayPoly[arrayPolySize - 1].color = 0xFF00FF0F;
             arrayPoly[arrayPolySize - 1].pointsSize = 0;
             arrayPoly[arrayPolySize - 1].zOrder = 0;
             break;

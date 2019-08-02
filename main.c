@@ -175,8 +175,8 @@ int main( int argc, char* args[] )
                             break;
                     }
                 }
-                else
-                    Editor_EventsHandler(&e);
+                //else
+                Editor_EventsHandler(&e);
             }
 
             //UPDATE:   ///////////////////////////////////////////////////////////////////////////////
