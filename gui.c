@@ -31,7 +31,7 @@ void GUI_Quit()
     lastButtonwithEvent = NULL;
 }
 
-GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(), void (*WhenPassedOver)(),
+GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(), void (*WhenPassedOver)(), void (*WhenUnClicked)(),
                         const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
                         uint16_t w, uint16_t h, uint32_t color)
 {
@@ -46,6 +46,7 @@ GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(), void (*WhenPassedOver)
     arrayGui[arrayGuiSize]->w = w;    arrayGui[arrayGuiSize]->h = h;
     arrayGui[arrayGuiSize]->WhenClicked = WhenClicked;
     arrayGui[arrayGuiSize]->WhenPassedOver = WhenPassedOver;
+    arrayGui[arrayGuiSize]->WhenUnClicked = WhenUnClicked;
     //button->color = color;
 //    button->whereToDrawSurface = surface;
 
@@ -91,7 +92,7 @@ GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(), void (*WhenPassedOver)
 //}
 
 
-
+static GUI_Button* lastButtonDown = NULL;
 int8_t GUI_EventButtons(SDL_Event* e)   //Eliminate the second parameter. That function should be specified inside of the button struct.
 {
      //Get mouse position
@@ -100,28 +101,43 @@ int8_t GUI_EventButtons(SDL_Event* e)   //Eliminate the second parameter. That f
 
     for(int i = 0; i < arrayGuiSize; i++)
     {
-        if(e->type == SDL_MOUSEBUTTONDOWN &&
-                x < (arrayGui[i]->w + arrayGui[i]->x) && x > arrayGui[i]->x &&
+        if(x < (arrayGui[i]->w + arrayGui[i]->x) && x > arrayGui[i]->x &&
                 y < (arrayGui[i]->h + arrayGui[i]->y) && y > arrayGui[i]->y)
         {
-            if(arrayGui[i]->WhenClicked != NULL)
-                arrayGui[i]->WhenClicked();
+            if(e->type == SDL_MOUSEBUTTONDOWN)
+            {
+                if(arrayGui[i]->WhenClicked != NULL)
+                    arrayGui[i]->WhenClicked();
 
-            lastButtonwithEvent = arrayGui[i];
-            printf("%p just been clicked! \n", arrayGui[i]);
-            return 1;
-        }
-        if(e->type == SDL_MOUSEMOTION &&
-                x < (arrayGui[i]->w + arrayGui[i]->x) && x > arrayGui[i]->x &&
-                y < (arrayGui[i]->h + arrayGui[i]->y) && y > arrayGui[i]->y)
-        {
-            if(arrayGui[i]->WhenPassedOver != NULL)
-                arrayGui[i]->WhenPassedOver();
+                lastButtonwithEvent = arrayGui[i];
+                lastButtonDown = arrayGui[i];
 
-            lastButtonwithEvent = arrayGui[i];
-            printf("%p just been passed over! \n", arrayGui[i]);
-            return 2;
+                printf("%p just been clicked! \n", arrayGui[i]);
+                return 1;
+            }
+            else if(e->type == SDL_MOUSEMOTION)
+            {
+                if(arrayGui[i]->WhenPassedOver != NULL)
+                    arrayGui[i]->WhenPassedOver();
+
+                lastButtonwithEvent = arrayGui[i];
+                printf("%p just been passed over! \n", arrayGui[i]);
+                return 2;
+            }
         }
+    }
+
+    if(lastButtonDown != NULL && e->type == SDL_MOUSEBUTTONUP)
+    {
+        if(lastButtonDown->WhenUnClicked != NULL)
+            lastButtonDown->WhenUnClicked();
+
+        lastButtonwithEvent = lastButtonDown;
+
+        printf("%p just been unClicked! \n", lastButtonDown);
+
+        lastButtonDown = NULL;
+        return 3;
     }
     return 0;
 }
@@ -142,7 +158,10 @@ GUI_Button* GUI_GetLastButtonWithEvent()    //Returns the id of the last button 
     return lastButtonwithEvent;
 }
 
-
+GUI_Button* GUI_GetLastButtonDown()
+{
+    return lastButtonDown;
+}
 
 
 

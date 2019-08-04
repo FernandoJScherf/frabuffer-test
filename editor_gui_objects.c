@@ -1,7 +1,8 @@
 #include "editor_gui_objects.h"
 
 //The states that the editor can be in:
-typedef enum States {   None, Add_New_Point_To_Poly, Add_New_Surface  } States;
+typedef enum States {   None, Add_New_Point_To_Poly, Add_New_Surface,
+                        Move_Poly_Point} States;
 
 //typedef enum DrawableType { DNone = 0, DPoly, DSurface } DrawableType;
 
@@ -11,6 +12,11 @@ typedef struct Poly {
     uint16_t pointsSize;        //The size of the array of points.
     uint32_t color;             //The color of the polygon.
 } Poly;
+
+typedef struct ButtonPoint {    //A structure that contains a button associated to a point in a polygon, to be able to
+    GUI_Button* button;         //select it and move it.
+    Point* point;
+} ButtonPoint;
 
 //Later I could try implementing different types of Polys, maybe adding a
 //typedef enum PolyType { Flat, Textured, Gouraud, Dither, DitherTransparency, Noise(rand()) and other effects } PolyType;
@@ -23,12 +29,15 @@ typedef struct Surface {
     uint16_t x, y, w, h;        //We can stretch! I don't know if this is the best way to do it.
 }   Surface;
 
-//dynamicly growing arrays of surfaces and polygons:
-static Poly* arrayPoly = NULL;
+//dynamicly growing arrays of surfaces and polygons, and buttons associated to points.:
+static Poly*    arrayPoly = NULL;
 static uint16_t arrayPolySize = 0;
 
 static Surface* arraySurf = NULL;
 static uint16_t arraySurfSize = 0;
+
+static ButtonPoint* arrayButtPnt = NULL;
+static uint16_t     arrayButtPntSize = 0;
 
 //Some globals for this file:
 static SDL_Surface* editorSurface = NULL;   //The surface that will be drawn by the editor.
@@ -47,50 +56,46 @@ static int mouseY = 0;
 //There will be practically no efficiency saving in having triangles separated from more complex polys.
 
 //Button's Functions: //////////////////////////////////////////////////////////////////////
-static void test1()
+static void clickNone()
 {
-//    printf("click1. SDL_GetLastButtonPressed(): %p \n", GUI_GetLastButtonWithEvent() );
     Editor_Change_State(None);
 }
 
-static void test2()
+static void clickStartNewPoly()
 {
-//    printf("click2. SDL_GetLastButtonPressed(): %p \n", GUI_GetLastButtonWithEvent() );
     Editor_Change_State(Add_New_Point_To_Poly);
 }
-static void test3()
+static void clickStartNewSurface()
 {
-//    printf("click3. SDL_GetLastButtonPressed(): %p \n", GUI_GetLastButtonWithEvent() );
     Editor_Change_State(Add_New_Surface);
 }
 
 static void clickPoint()
 {
-//    Editor_Change_State(Move_Poly_Point); //Something like this.
+    Editor_Change_State(Move_Poly_Point); //Something like this.
+    //It should be something like:  Press one of the buttons of the polys.
+    //                              Change editor to state in which that point is moved.
+    //                              Change to normal state when the click goes up.
+}
+static void unClickPoint()
+{
+    Editor_Change_State(None);
 }
 static void movePoint()
 {
     //If this function was called it means that the mouse moved on top
     //of a button of one of the polys.
 
+//    GUI_Button* button;
 //    switch (editorState)
 //    {
-//        case Move_PolyPoint
+//        case Move_Poly_Point:
+//            button = GUI_GetLastButtonDown();
+//            button->x = mouseX;
+//            button->y = mouseY;
+//            printf("button->x: %d, button->y: %d \n", button->x, button->y );
+//            break;
 //    }
-
-    if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))    //If, also, the left click is down.
-    {
-        GUI_Button* button = GUI_GetLastButtonWithEvent();
-        button->x = mouseX;
-        button->y = mouseY;
-        printf("button->x: %d, button->y: %d \n", button->x, button->y );
-    }
-
-
-    //This is a start, but probably not the bet way to do it.
-    //It should be something like:  Press one of the buttons of the polys.
-    //                              Change editor to an state in which that point is moved.
-    //                              Change to normal state when the click goes up.
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -108,9 +113,9 @@ void Editor_Init(SDL_Surface* surface)
 
     GUI_Init(editorSurface);
 
-    GUI_CreateTextButton(   test1, NULL, "go to test1", editorFont,
+    GUI_CreateTextButton(   clickNone, NULL, NULL, "go to test1", editorFont,
                             editorSurface->w - 60, 10, 40, 30, 0xFF000000);
-    GUI_CreateTextButton(   test2, NULL, "go to test2", editorFont,
+    GUI_CreateTextButton(   clickStartNewPoly, NULL, NULL, "go to test2", editorFont,
                             editorSurface->w - 60, 60, 40, 30, 0xFF000000);
 }
 
@@ -149,34 +154,30 @@ void Editor_EventsHandler(SDL_Event* e)
             if(e->type == SDL_MOUSEBUTTONDOWN)
             {
                 //When we add a new point, we need to allocate new memory for a new point:
-
                 workPoly->points = realloc(workPoly->points, ++(workPoly->pointsSize) * sizeof(Point));
-
                 printf("%d, %d\n", arrayPoly[arrayPolySize - 1].points, arrayPoly[arrayPolySize - 1].pointsSize);
+                //Create button for correspondent point:
+                arrayButtPnt = realloc(arrayButtPnt, ++arrayButtPntSize * sizeof(ButtonPoint));
 
                 //And assign the addecuate values to the points:
-                if(whereToPutPoint >= (workPoly->pointsSize - 1))
-                {
-                    workPoly->points[whereToPutPoint].x = mouseX;
-                    workPoly->points[whereToPutPoint].y = mouseY;
-                    printf("whereToPutPoint normal %d\n", whereToPutPoint);
-                }
-                else
+                if(whereToPutPoint < (workPoly->pointsSize - 1))       //If we are NOT placing point in last pos.
                 {
                     for(int i = workPoly->pointsSize - 1; i > whereToPutPoint; i--)
                         workPoly->points[i] = workPoly->points[i - 1];
-
-                    workPoly->points[whereToPutPoint].x = mouseX;
-                    workPoly->points[whereToPutPoint].y = mouseY;
                     printf("whereToPutPoint special %d\n", whereToPutPoint);
                 }
-                whereToPutPoint++;
+                workPoly->points[whereToPutPoint].x = mouseX;
+                workPoly->points[whereToPutPoint].y = mouseY;
 
-                //Button for correspondent point:
-                GUI_CreateTextButton(NULL, movePoint, "b", editorFont, mouseX, mouseY, 8, 8, BLUE);
+                //For each point added we need a button associated with it, to be able to manipulate it:
+                arrayButtPnt[arrayButtPntSize-1].button =
+                                GUI_CreateTextButton(clickPoint, movePoint, unClickPoint, "b", editorFont, mouseX, mouseY, 10, 10, BLUE);
+                arrayButtPnt[arrayButtPntSize-1].point = &(workPoly->points[whereToPutPoint]);
+
+                whereToPutPoint++;
             }
             //////////
-            else if(e->type == SDL_MOUSEMOTION && workPoly->pointsSize > 2)
+            else if(e->type == SDL_MOUSEMOTION)
             {
                 //And assign the addecuate values to said point:
 //                workPoly->points[workPoly->pointsSize - 1].x = mouseX;
@@ -202,6 +203,15 @@ void Editor_EventsHandler(SDL_Event* e)
             }
         }
             break;
+        ///////////////////////////////////////////////////////////////////////////////////////
+        case Move_Poly_Point:
+        {
+            GUI_Button* button = GUI_GetLastButtonDown();
+            button->x = mouseX;
+            button->y = mouseY;
+            printf("button->x: %d, button->y: %d \n", button->x, button->y );
+            break;
+        }
         ///////////////////////////////////////////////////////////////////////////////////////
     }
 }
@@ -233,6 +243,8 @@ void Editor_Change_State(States newState)
             break;
         case Add_New_Point_To_Poly:
             break;
+        case Move_Poly_Point:
+            break;
         default:
             printf("Invalid current state!\n");
             break;
@@ -253,6 +265,8 @@ void Editor_Change_State(States newState)
             arrayPoly[arrayPolySize - 1].pointsSize = 0;
             arrayPoly[arrayPolySize - 1].zOrder = 0;
             whereToPutPoint = 0;
+            break;
+        case Move_Poly_Point:
             break;
         default:
             printf("Invalid new state!\n");
