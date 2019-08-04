@@ -29,6 +29,8 @@ typedef struct Point {
     float x, y;
 } Point;
 
+enum basicColor {RED = 0xFFFF0000, GREEN = 0xFF00FF00, BLUE = 0xFF0000FF};
+
 //Let's try to do it better:
 //http://www.hugi.scene.org/online/coding/hugi%2017%20-%20cotriang.htm
 

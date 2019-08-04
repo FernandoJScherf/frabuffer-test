@@ -37,6 +37,10 @@ static TTF_Font *editorFont = NULL;         //The font that will be used by the 
 
 static States editorState;                  //The current state of the editor. Initialized in Editor_Init.
 
+static uint32_t mouseState = 0;
+static int mouseX = 0;
+static int mouseY = 0;
+
 //Why separate the concept of triangle and poly? A triangle IS a poly.
 //Why write different cases for each? It's unnecessarily complicating everything.
 //So let's fix that.
@@ -45,18 +49,48 @@ static States editorState;                  //The current state of the editor. I
 //Button's Functions: //////////////////////////////////////////////////////////////////////
 static void test1()
 {
-    printf("click1. \n");
+//    printf("click1. SDL_GetLastButtonPressed(): %p \n", GUI_GetLastButtonWithEvent() );
     Editor_Change_State(None);
 }
+
 static void test2()
 {
-    printf("click2. \n");
+//    printf("click2. SDL_GetLastButtonPressed(): %p \n", GUI_GetLastButtonWithEvent() );
     Editor_Change_State(Add_New_Point_To_Poly);
 }
 static void test3()
 {
-    printf("click3. \n");
+//    printf("click3. SDL_GetLastButtonPressed(): %p \n", GUI_GetLastButtonWithEvent() );
     Editor_Change_State(Add_New_Surface);
+}
+
+static void clickPoint()
+{
+//    Editor_Change_State(Move_Poly_Point); //Something like this.
+}
+static void movePoint()
+{
+    //If this function was called it means that the mouse moved on top
+    //of a button of one of the polys.
+
+//    switch (editorState)
+//    {
+//        case Move_PolyPoint
+//    }
+
+    if (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))    //If, also, the left click is down.
+    {
+        GUI_Button* button = GUI_GetLastButtonWithEvent();
+        button->x = mouseX;
+        button->y = mouseY;
+        printf("button->x: %d, button->y: %d \n", button->x, button->y );
+    }
+
+
+    //This is a start, but probably not the bet way to do it.
+    //It should be something like:  Press one of the buttons of the polys.
+    //                              Change editor to an state in which that point is moved.
+    //                              Change to normal state when the click goes up.
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -70,11 +104,13 @@ void Editor_Init(SDL_Surface* surface)
 
     editorState = None;
 
+    mouseState = 0;
+
     GUI_Init(editorSurface);
 
-    GUI_CreateTextButton(   test1, "go to test1", editorFont,
+    GUI_CreateTextButton(   test1, NULL, "go to test1", editorFont,
                             editorSurface->w - 60, 10, 40, 30, 0xFF000000);
-    GUI_CreateTextButton(   test2, "go to test2", editorFont,
+    GUI_CreateTextButton(   test2, NULL, "go to test2", editorFont,
                             editorSurface->w - 60, 60, 40, 30, 0xFF000000);
 }
 
@@ -90,17 +126,20 @@ void Editor_Quit()
 static uint16_t whereToPutPoint = 0;
 void Editor_EventsHandler(SDL_Event* e)
 {
+    //Get mouse state:
+    mouseState = SDL_GetMouseState( &mouseX, &mouseY ); //Fill those globals every cicle.
+
     if(GUI_EventButtons(e))        //If a click was registered on any of the gui elements, return;
         return;
     //If we continue, it means the click was on a drawable part of the surface:
-
-    //Get mouse position:
-    int x, y;
-    SDL_GetMouseState( &x, &y );
-
     switch(editorState)
     {
         case None:
+//            if(e->type == SDL_MOUSEMOTION)
+//            {
+//                if((mouseState & SDL_BUTTON(SDL_BUTTON_LEFT)))
+//                    ;
+//            }
 
             break;
         case Add_New_Point_To_Poly:
@@ -118,8 +157,8 @@ void Editor_EventsHandler(SDL_Event* e)
                 //And assign the addecuate values to the points:
                 if(whereToPutPoint >= (workPoly->pointsSize - 1))
                 {
-                    workPoly->points[whereToPutPoint].x = x;
-                    workPoly->points[whereToPutPoint].y = y;
+                    workPoly->points[whereToPutPoint].x = mouseX;
+                    workPoly->points[whereToPutPoint].y = mouseY;
                     printf("whereToPutPoint normal %d\n", whereToPutPoint);
                 }
                 else
@@ -127,19 +166,22 @@ void Editor_EventsHandler(SDL_Event* e)
                     for(int i = workPoly->pointsSize - 1; i > whereToPutPoint; i--)
                         workPoly->points[i] = workPoly->points[i - 1];
 
-                    workPoly->points[whereToPutPoint].x = x;
-                    workPoly->points[whereToPutPoint].y = y;
+                    workPoly->points[whereToPutPoint].x = mouseX;
+                    workPoly->points[whereToPutPoint].y = mouseY;
                     printf("whereToPutPoint special %d\n", whereToPutPoint);
                 }
                 whereToPutPoint++;
+
+                //Button for correspondent point:
+                GUI_CreateTextButton(NULL, movePoint, "b", editorFont, mouseX, mouseY, 8, 8, BLUE);
             }
             //////////
             else if(e->type == SDL_MOUSEMOTION && workPoly->pointsSize > 2)
             {
                 //And assign the addecuate values to said point:
-//                workPoly->points[workPoly->pointsSize - 1].x = x;
-//                workPoly->points[workPoly->pointsSize - 1].y = y;
-                //printf("x: %d, y: %d \n", x, y);
+//                workPoly->points[workPoly->pointsSize - 1].x = mouseX;
+//                workPoly->points[workPoly->pointsSize - 1].y = mouseY;
+                //printf("x: %d, y: %d \n", mouseX, mouseY);
             }
             //////////
             else if(e->type == SDL_KEYDOWN)
@@ -171,29 +213,14 @@ void Editor_Update()
 
 void Editor_Draw()
 {
-    GUI_DrawButtons();
-
     //Draw polys:
     for(int i = 0; i < arrayPolySize; i++)
-    {
         PolyFlat(arrayPoly[i].points, arrayPoly[i].pointsSize, arrayPoly[i].color, editorSurface);
 
-        for(int j = 0; j < arrayPoly[i].pointsSize; j++)
-        {
-            //Mini triangle to mark a point:
-            Point v1, v2, v3;
-            v1.x = arrayPoly[i].points[j].x - 4;   //HARDCODING IS BAD!
-            v1.y = arrayPoly[i].points[j].y + 4;
-            v2.x = arrayPoly[i].points[j].x;        //HARDCODING IS BAD!
-            v2.y = arrayPoly[i].points[j].y - 4;
-            v3.x = arrayPoly[i].points[j].x + 4;   //HARDCODING IS BAD! Also, this could be buttons!!!
-            v3.y = arrayPoly[i].points[j].y + 4;
-            TriangleFlat(v1, v2, v3, j * 50, editorSurface);
-        }
-
-    }
-
     //Draw surfaces:
+
+    //Draw Gui:
+    GUI_DrawButtons();
 
 }
 

@@ -7,6 +7,8 @@ uint16_t arrayGuiSize = 0;
 //The gui will be drawed inside of this surface:
 SDL_Surface* whereToDrawTheGui = NULL;
 
+static GUI_Button* lastButtonwithEvent = NULL;
+
 void GUI_Init(SDL_Surface* destSurface)
 {
 //The newly created gui will be drawn inside of this surface:
@@ -25,9 +27,11 @@ void GUI_Quit()
     arrayGui = NULL;
     arrayGuiSize = 0;
     whereToDrawTheGui = NULL;
+
+    lastButtonwithEvent = NULL;
 }
 
-GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
+GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(), void (*WhenPassedOver)(),
                         const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
                         uint16_t w, uint16_t h, uint32_t color)
 {
@@ -41,6 +45,7 @@ GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
     arrayGui[arrayGuiSize]->x = x;    arrayGui[arrayGuiSize]->y = y;
     arrayGui[arrayGuiSize]->w = w;    arrayGui[arrayGuiSize]->h = h;
     arrayGui[arrayGuiSize]->WhenClicked = WhenClicked;
+    arrayGui[arrayGuiSize]->WhenPassedOver = WhenPassedOver;
     //button->color = color;
 //    button->whereToDrawSurface = surface;
 
@@ -84,6 +89,9 @@ GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
 //    //button->text = (char*) realloc(button->text, strlen(text) + 1);
 ////    button->textSurface = TTF_RenderText_Solid(textFont, text, (SDL_Color){255, 255, 255, 255});
 //}
+
+
+
 int8_t GUI_EventButtons(SDL_Event* e)   //Eliminate the second parameter. That function should be specified inside of the button struct.
 {
      //Get mouse position
@@ -92,12 +100,27 @@ int8_t GUI_EventButtons(SDL_Event* e)   //Eliminate the second parameter. That f
 
     for(int i = 0; i < arrayGuiSize; i++)
     {
-         if(e->type == SDL_MOUSEBUTTONDOWN &&
+        if(e->type == SDL_MOUSEBUTTONDOWN &&
                 x < (arrayGui[i]->w + arrayGui[i]->x) && x > arrayGui[i]->x &&
                 y < (arrayGui[i]->h + arrayGui[i]->y) && y > arrayGui[i]->y)
         {
-            arrayGui[i]->WhenClicked();
+            if(arrayGui[i]->WhenClicked != NULL)
+                arrayGui[i]->WhenClicked();
+
+            lastButtonwithEvent = arrayGui[i];
+            printf("%p just been clicked! \n", arrayGui[i]);
             return 1;
+        }
+        if(e->type == SDL_MOUSEMOTION &&
+                x < (arrayGui[i]->w + arrayGui[i]->x) && x > arrayGui[i]->x &&
+                y < (arrayGui[i]->h + arrayGui[i]->y) && y > arrayGui[i]->y)
+        {
+            if(arrayGui[i]->WhenPassedOver != NULL)
+                arrayGui[i]->WhenPassedOver();
+
+            lastButtonwithEvent = arrayGui[i];
+            printf("%p just been passed over! \n", arrayGui[i]);
+            return 2;
         }
     }
     return 0;
@@ -114,8 +137,10 @@ void GUI_DrawButtons()
     }
 }
 
-
-
+GUI_Button* GUI_GetLastButtonWithEvent()    //Returns the id of the last button pressed.
+{
+    return lastButtonwithEvent;
+}
 
 
 

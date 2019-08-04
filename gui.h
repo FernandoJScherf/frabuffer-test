@@ -15,13 +15,14 @@ typedef struct GUI_Button {
     //SDL_Color textColor;
     //Functions that EventButton calls when certain event took place:
     void (*WhenClicked)();
+    void (*WhenPassedOver)();
     //Start with only that function, but later implement whenUnClicked and WhenPassedOver.
 } GUI_Button;
 
 //Create a button and add it to the internal array of gui elements:
 //If the user wants, can keep a pointer to the button created, so he can later pass it to
 //other functions to modify it, like change text, or direcrly change its position.
-GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(),
+GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(), void (*WhenPassedOver)(),
                             const char* text, TTF_Font* textFont, uint16_t x, uint16_t y,
                             uint16_t w, uint16_t h, uint32_t color);
 //void ChangeTextOfButton(Button* button, TTF_Font* textFont, const char* text);
@@ -31,5 +32,7 @@ void GUI_DestroyButtons();
 
 void GUI_Init(SDL_Surface* destSurface);  //To call before using any of the other functions.
 void GUI_Quit();                    //To free all memory allocated for the array of buttons.
+
+GUI_Button* GUI_GetLastButtonWithEvent();    //Returns pointer to the last button pressed.
 
 #endif // GUI_H_INCLUDED
