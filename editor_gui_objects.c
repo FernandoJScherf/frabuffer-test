@@ -143,33 +143,30 @@ void Editor_EventsHandler(SDL_Event* e)
             Poly* workPoly = &(arrayPoly[arrayPolySize - 1]);
             if(e->type == SDL_MOUSEBUTTONDOWN)
             {
-                //When we add a new point, we need to allocate new memory for a new point:
+                //When we add a new point, we need to allocate new memory for what will point to it in the array:
                 workPoly->points = realloc(workPoly->points, ++(workPoly->pointsSize) * sizeof(Point*));
-                //Add one point to the array:
-                workPoly->points[workPoly->pointsSize - 1] = malloc(sizeof(Point));
 
-                //printf("%d, %d\n", arrayPoly[arrayPolySize - 1].points, arrayPoly[arrayPolySize - 1].pointsSize);
-
-                //Create button for correspondent point:
-                arrayButtPnt = realloc(arrayButtPnt, ++arrayButtPntSize * sizeof(ButtonPoint));
-
-                //And assign the addecuate values to the points:
-                if(whereToPutPoint < (workPoly->pointsSize - 1))       //If we are NOT placing point in last pos.
+                //If we are NOT placing point in last pos, push elements in the array:
+                if(whereToPutPoint < (workPoly->pointsSize - 1))
                 {
                     for(int i = workPoly->pointsSize - 1; i > whereToPutPoint; i--)
-                    {
-                        workPoly->points[i]->x = workPoly->points[i - 1]->x;
-                        workPoly->points[i]->y = workPoly->points[i - 1]->y;
-                    }
+                        workPoly->points[i]= workPoly->points[i - 1];
 
                     printf("whereToPutPoint special %d\n", whereToPutPoint);
                 }
+                //Add one point to the array:
+                workPoly->points[whereToPutPoint] = malloc(sizeof(Point));
+                //The values of the new point:
                 workPoly->points[whereToPutPoint]->x = mouseX;
                 workPoly->points[whereToPutPoint]->y = mouseY;
 
                 //For each point added we need a button associated with it, to be able to manipulate it:
+
+                //Create button for correspondent point:
+                arrayButtPnt = realloc(arrayButtPnt, ++arrayButtPntSize * sizeof(ButtonPoint));
+
                 arrayButtPnt[arrayButtPntSize-1].button =
-                                GUI_CreateTextButton(clickPoint, passedOverPoint, unClickPoint, "b", editorFont, mouseX, mouseY, 10, 10, BLUE);
+                                GUI_CreateTextButton(clickPoint, passedOverPoint, unClickPoint, "b", editorFont, mouseX, mouseY, 12, 12, BLUE);
                 arrayButtPnt[arrayButtPntSize-1].point = workPoly->points[whereToPutPoint];
 
                 printf("Assigned button: %p to point: %p \n", arrayButtPnt[arrayButtPntSize-1].button, arrayButtPnt[arrayButtPntSize-1].point);
