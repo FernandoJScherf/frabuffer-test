@@ -83,7 +83,7 @@ GUI_Button* GUI_CreateTextButton(  void (*WhenClicked)(), void (*WhenPassedOver)
     LineBresenham(0, h-1, w-1, h-1, 0xFFFFFFFF, arrayGui[arrayGuiSize]->drawThisSurface);
 
     arrayGuiSize++;
-    return arrayGui[arrayGuiSize];
+    return arrayGui[arrayGuiSize - 1];
 }
 //void ChangeTextOfButton(Button* button, TTF_Font* textFont, const char* text)       //Add text color.
 //{
@@ -121,7 +121,7 @@ int8_t GUI_EventButtons(SDL_Event* e)   //Eliminate the second parameter. That f
                     arrayGui[i]->WhenPassedOver();
 
                 lastButtonwithEvent = arrayGui[i];
-                printf("%p just been passed over! \n", arrayGui[i]);
+                //printf("%p just been passed over! \n", arrayGui[i]);
                 return 2;
             }
         }

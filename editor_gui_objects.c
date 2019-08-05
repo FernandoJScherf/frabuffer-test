@@ -8,7 +8,7 @@ typedef enum States {   None, Add_New_Point_To_Poly, Add_New_Surface,
 
 typedef struct Poly {
     uint16_t zOrder;
-    Point* points;              //A pointer to a dynamic array of pointers to triangles (That will be in the array of triangles).
+    Point** points;              //A pointer to a dynamic array of pointers to triangles (That will be in the array of triangles).
     uint16_t pointsSize;        //The size of the array of points.
     uint32_t color;             //The color of the polygon.
 } Poly;
@@ -81,21 +81,11 @@ static void unClickPoint()
 {
     Editor_Change_State(None);
 }
-static void movePoint()
+static void passedOverPoint()
 {
     //If this function was called it means that the mouse moved on top
     //of a button of one of the polys.
 
-//    GUI_Button* button;
-//    switch (editorState)
-//    {
-//        case Move_Poly_Point:
-//            button = GUI_GetLastButtonDown();
-//            button->x = mouseX;
-//            button->y = mouseY;
-//            printf("button->x: %d, button->y: %d \n", button->x, button->y );
-//            break;
-//    }
 }
 ////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -154,8 +144,12 @@ void Editor_EventsHandler(SDL_Event* e)
             if(e->type == SDL_MOUSEBUTTONDOWN)
             {
                 //When we add a new point, we need to allocate new memory for a new point:
-                workPoly->points = realloc(workPoly->points, ++(workPoly->pointsSize) * sizeof(Point));
-                printf("%d, %d\n", arrayPoly[arrayPolySize - 1].points, arrayPoly[arrayPolySize - 1].pointsSize);
+                workPoly->points = realloc(workPoly->points, ++(workPoly->pointsSize) * sizeof(Point*));
+                //Add one point to the array:
+                workPoly->points[workPoly->pointsSize - 1] = malloc(sizeof(Point));
+
+                //printf("%d, %d\n", arrayPoly[arrayPolySize - 1].points, arrayPoly[arrayPolySize - 1].pointsSize);
+
                 //Create button for correspondent point:
                 arrayButtPnt = realloc(arrayButtPnt, ++arrayButtPntSize * sizeof(ButtonPoint));
 
@@ -163,16 +157,22 @@ void Editor_EventsHandler(SDL_Event* e)
                 if(whereToPutPoint < (workPoly->pointsSize - 1))       //If we are NOT placing point in last pos.
                 {
                     for(int i = workPoly->pointsSize - 1; i > whereToPutPoint; i--)
-                        workPoly->points[i] = workPoly->points[i - 1];
+                    {
+                        workPoly->points[i]->x = workPoly->points[i - 1]->x;
+                        workPoly->points[i]->y = workPoly->points[i - 1]->y;
+                    }
+
                     printf("whereToPutPoint special %d\n", whereToPutPoint);
                 }
-                workPoly->points[whereToPutPoint].x = mouseX;
-                workPoly->points[whereToPutPoint].y = mouseY;
+                workPoly->points[whereToPutPoint]->x = mouseX;
+                workPoly->points[whereToPutPoint]->y = mouseY;
 
                 //For each point added we need a button associated with it, to be able to manipulate it:
                 arrayButtPnt[arrayButtPntSize-1].button =
-                                GUI_CreateTextButton(clickPoint, movePoint, unClickPoint, "b", editorFont, mouseX, mouseY, 10, 10, BLUE);
-                arrayButtPnt[arrayButtPntSize-1].point = &(workPoly->points[whereToPutPoint]);
+                                GUI_CreateTextButton(clickPoint, passedOverPoint, unClickPoint, "b", editorFont, mouseX, mouseY, 10, 10, BLUE);
+                arrayButtPnt[arrayButtPntSize-1].point = workPoly->points[whereToPutPoint];
+
+                printf("Assigned button: %p to point: %p \n", arrayButtPnt[arrayButtPntSize-1].button, arrayButtPnt[arrayButtPntSize-1].point);
 
                 whereToPutPoint++;
             }
@@ -209,7 +209,22 @@ void Editor_EventsHandler(SDL_Event* e)
             GUI_Button* button = GUI_GetLastButtonDown();
             button->x = mouseX;
             button->y = mouseY;
-            printf("button->x: %d, button->y: %d \n", button->x, button->y );
+
+            //Lets find out which point is associated to this button:
+            for(int i = 0; i < arrayButtPntSize; i++)
+            {
+                if(arrayButtPnt[i].button == button)
+                {   //And also change its coordinates:
+                    printf("Moving assigned button %p to point %p\n", arrayButtPnt[i].button, arrayButtPnt[i].point);
+                    //printf("%p\n", arrayButtPnt[i].point);
+                    arrayButtPnt[i].point->x = mouseX;
+                    arrayButtPnt[i].point->y = mouseY;
+                    //printf("arrayButtPnt[i].point->x: %f, arrayButtPnt[i].point->y: %f \n", arrayButtPnt[i].point->x, arrayButtPnt[i].point->y );
+                    break;
+                }
+            }
+
+
             break;
         }
         ///////////////////////////////////////////////////////////////////////////////////////
@@ -260,7 +275,7 @@ void Editor_Change_State(States newState)
 
             //If it's the first point of a new poly, we need to allocate memory:
             arrayPoly = realloc(arrayPoly, ( ++arrayPolySize ) * sizeof(Poly));
-            arrayPoly[arrayPolySize - 1].points = malloc(sizeof(Point));
+            arrayPoly[arrayPolySize - 1].points = malloc(sizeof(Point*));
             arrayPoly[arrayPolySize - 1].color = 0xFF00FF0F;
             arrayPoly[arrayPolySize - 1].pointsSize = 0;
             arrayPoly[arrayPolySize - 1].zOrder = 0;
